@@ -1,8 +1,7 @@
-namespace WebApiGoodPracticesSample.Web.Model
+namespace WebApiGoodPracticesSample.Web.DTO
 {
-    public class CarModel
+    public class CreateCarDto
     {
-        public int Id { get; set; }
         public string Model { get; set; }
         public string Year { get; set; }
         public string SerialNumber { get; set; }

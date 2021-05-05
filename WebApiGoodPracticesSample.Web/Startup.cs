@@ -4,7 +4,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json.Converters;
+using System;
 using WebApiGoodPracticesSample.Web.DAL;
+using WebApiGoodPracticesSample.Web.Services;
 
 namespace WebApiGoodPracticesSample.Web
 {
@@ -20,14 +23,21 @@ namespace WebApiGoodPracticesSample.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services
+                .AddControllers()
+                .AddNewtonsoftJson(opts => opts.SerializerSettings.Converters.Add(new StringEnumConverter()));
 
-            services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebApiGoodPracticesSample.Web", Version = "v1" });
+
+                c.CustomSchemaIds(x => x.FullName);
             });
 
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
             services.AddSingleton<IDataRepository, DataRepository>();
+            services.AddSingleton<ICarService, CarService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
