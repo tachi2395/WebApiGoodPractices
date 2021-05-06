@@ -7,6 +7,7 @@ using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Converters;
 using System;
 using WebApiGoodPracticesSample.Web.DAL;
+using WebApiGoodPracticesSample.Web.Helpers;
 using WebApiGoodPracticesSample.Web.Model;
 using WebApiGoodPracticesSample.Web.Services;
 
@@ -45,7 +46,10 @@ namespace WebApiGoodPracticesSample.Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app,
+            IWebHostEnvironment env,
+            IDataRepository<CarModel> carRepository,
+            IDataRepository<DriverModel> driverRepo)
         {
             if (env.IsDevelopment())
             {
@@ -64,6 +68,8 @@ namespace WebApiGoodPracticesSample.Web
             {
                 endpoints.MapControllers();
             });
+
+            EntityFillerHelper.FillDataBase(carRepository, driverRepo);
         }
     }
 }

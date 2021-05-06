@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using WebApiGoodPracticesSample.Web.DTO.Cars;
 using WebApiGoodPracticesSample.Web.DTO.Drivers;
-using WebApiGoodPracticesSample.Web.Model;
 using WebApiGoodPracticesSample.Web.Services;
 
 namespace WebApiGoodPracticesSample.Web.Controllers
@@ -13,19 +12,20 @@ namespace WebApiGoodPracticesSample.Web.Controllers
     public class CarsController : ControllerBase
     {
         private readonly CarService _carService;
-        private readonly IService<DriverModel> _driverService;
 
-        public CarsController(CarService carService, IService<DriverModel> driverService)
+        public CarsController(CarService carService)
         {
             _carService = carService;
-            _driverService = driverService;
         }
 
         [HttpGet]
         [Route("{id}")]
         public ActionResult<CarDto> Get([FromRoute] int id)
         {
-            return Ok(Get(id));
+            var car = _carService.Get(id);
+            if (car == null) return NotFound();
+
+            return Ok(car);
         }
 
         [HttpGet]
@@ -42,11 +42,9 @@ namespace WebApiGoodPracticesSample.Web.Controllers
         [Route("{id}/drivers")]
         public ActionResult<IEnumerable<DriverDto>> GetDrivers([FromRoute] int id)
         {
-            var carDto = _carService.Get(id);
+            var drivers = _carService.GetDrivers(id);
 
-            if (carDto == null) return NotFound();
-
-            var drivers = _driverService.Get(x => x.CarId == carDto.Id);
+            if (drivers == null || !drivers.Any()) return NotFound();
 
             return Ok(drivers);
         }

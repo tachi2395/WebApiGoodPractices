@@ -15,6 +15,11 @@ namespace WebApiGoodPracticesSample.Web.DAL
             _entitites = new List<TEntity>();
         }
 
+        public TEntity Get(int id)
+        {
+            return _entitites.Where(x => x.Id == id).FirstOrDefault();
+        }
+
         public IEnumerable<TEntity> Get(IEnumerable<int> ids)
         {
             if (ids != null && ids.Any())

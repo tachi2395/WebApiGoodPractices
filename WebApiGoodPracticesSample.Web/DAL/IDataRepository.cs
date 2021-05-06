@@ -7,6 +7,7 @@ namespace WebApiGoodPracticesSample.Web.DAL
 {
     public interface IDataRepository<TEntity> where TEntity : CommonEntity
     {
+        TEntity Get(int id);
         IEnumerable<TEntity> Get(IEnumerable<int> ids);
         IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> query);
 
