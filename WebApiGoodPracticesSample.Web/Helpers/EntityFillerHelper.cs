@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using WebApiGoodPracticesSample.Web.DAL;
-using WebApiGoodPracticesSample.Web.Model;
+using WebApiGoodPracticesSample.Web.DAL.Entities;
 
 namespace WebApiGoodPracticesSample.Web.Helpers
 {
@@ -10,30 +10,30 @@ namespace WebApiGoodPracticesSample.Web.Helpers
         private const int CARS = 3;
         private const int DRIVERS = 10;
 
-        public static void FillDataBase(IDataRepository<CarModel> carRepository, IDataRepository<DriverModel> driverRepo)
+        public static void FillDataBase(IDataRepository<CarEntity> carRepository, IDataRepository<DriverEntity> driverRepo)
         {
             // filling cars
             var colors = Enum.GetValues(typeof(Color));
             for (var i = 0; i < CARS; i++)
             {
-                carRepository.Create(new CarModel
+                carRepository.Create(new CarEntity
                 {
                     Manufaturer = _manufacturers[new Random().Next(_manufacturers.Count)],
                     Name = _modelCatalog[new Random().Next(_modelCatalog.Count)],
                     Model = new Random().Next(1950, 2021) + "",
                     Color = (Color)colors.GetValue(new Random().Next(colors.Length)),
                     SerialNumber = Guid.NewGuid().ToString("n").Substring(0, 8),
-                    Drivers = new List<DriverModel>(),
+                    Drivers = new List<DriverEntity>(),
                     Id = 0
                 });
             }
 
             // filling drivers
-            var cars = carRepository.Get(x => true) as List<CarModel>;
+            var cars = carRepository.Get(x => true) as List<CarEntity>;
 
             for (var i = 0; i < DRIVERS; i++)
             {
-                driverRepo.Create(new DriverModel
+                driverRepo.Create(new DriverEntity
                 {
                     Id = 0,
                     Age = new Random().Next(19, 65),

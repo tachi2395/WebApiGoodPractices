@@ -1,8 +1,6 @@
-﻿using WebApiGoodPracticesSample.Web.DAL.Entities;
-
-namespace WebApiGoodPracticesSample.Web.Model
+﻿namespace WebApiGoodPracticesSample.Web.DAL.Entities
 {
-    public class DriverModel : CommonEntity
+    public class DriverEntity : CommonEntity
     {
         public string Name { get; set; }
         public string LastName { get; set; }

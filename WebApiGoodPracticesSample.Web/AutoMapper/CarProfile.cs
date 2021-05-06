@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
+using WebApiGoodPracticesSample.Web.DAL.Entities;
 using WebApiGoodPracticesSample.Web.DTO.Cars;
-using WebApiGoodPracticesSample.Web.Model;
 
 namespace WebApiGoodPracticesSample.Web.AutoMapper
 {
@@ -8,8 +8,8 @@ namespace WebApiGoodPracticesSample.Web.AutoMapper
     {
         public CarProfile()
         {
-            CreateMap<CarDto, CarModel>();
-            CreateMap<CreateUpdateCarDto, CarModel>();
+            CreateMap<CarDto, CarEntity>();
+            CreateMap<CreateUpdateCarDto, CarEntity>();
         }
     }
 }

@@ -1,9 +1,8 @@
-using System.Collections.Generic;
-using WebApiGoodPracticesSample.Web.DAL.Entities;
+﻿using System.Collections.Generic;
 
-namespace WebApiGoodPracticesSample.Web.Model
+namespace WebApiGoodPracticesSample.Web.DAL.Entities
 {
-    public class CarModel : CommonEntity
+    public class CarEntity : CommonEntity
     {
         public string Manufaturer { get; set; }
         public string Name { get; set; }
@@ -11,6 +10,6 @@ namespace WebApiGoodPracticesSample.Web.Model
         public string SerialNumber { get; set; }
         public Color Color { get; set; }
 
-        public IEnumerable<DriverModel> Drivers { get; set; }
+        public IEnumerable<DriverEntity> Drivers { get; set; }
     }
 }

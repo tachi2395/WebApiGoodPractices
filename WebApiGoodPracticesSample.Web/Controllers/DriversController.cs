@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
+using WebApiGoodPracticesSample.Web.DAL.Entities;
 using WebApiGoodPracticesSample.Web.DTO.Drivers;
-using WebApiGoodPracticesSample.Web.Model;
 using WebApiGoodPracticesSample.Web.Services;
 
 namespace WebApiGoodPracticesSample.Web.Controllers
@@ -11,9 +11,9 @@ namespace WebApiGoodPracticesSample.Web.Controllers
     [Route("[controller]")]
     public class DriversController : ControllerBase
     {
-        private readonly IService<DriverModel> _carService;
+        private readonly IService<DriverEntity> _carService;
 
-        public DriversController(IService<DriverModel> repository)
+        public DriversController(IService<DriverEntity> repository)
         {
             _carService = repository;
         }

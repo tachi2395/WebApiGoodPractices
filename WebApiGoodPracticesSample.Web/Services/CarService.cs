@@ -2,20 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using WebApiGoodPracticesSample.Web.DAL;
-using WebApiGoodPracticesSample.Web.Model;
+using WebApiGoodPracticesSample.Web.DAL.Entities;
 
 namespace WebApiGoodPracticesSample.Web.Services
 {
-    public class CarService : Service<CarModel>, ICarService
+    public class CarService : Service<CarEntity>, ICarService
     {
-        private readonly IDataRepository<DriverModel> _driverRepository;
+        private readonly IDataRepository<DriverEntity> _driverRepository;
 
-        public CarService(IMapper mapper, IDataRepository<CarModel> carRepository, IDataRepository<DriverModel> driverRepository) : base(mapper, carRepository)
+        public CarService(IMapper mapper, IDataRepository<CarEntity> carRepository, IDataRepository<DriverEntity> driverRepository) : base(mapper, carRepository)
         {
             _driverRepository = driverRepository;
         }
 
-        public override IEnumerable<CarModel> Get(IEnumerable<int> ids)
+        public override IEnumerable<CarEntity> Get(IEnumerable<int> ids)
         {
             var dtos = _dataRepository.Get(ids);
 
@@ -29,7 +29,7 @@ namespace WebApiGoodPracticesSample.Web.Services
             return dtos;
         }
 
-        public IEnumerable<DriverModel> GetDrivers(int id)
+        public IEnumerable<DriverEntity> GetDrivers(int id)
         {
             var car = _dataRepository.Get(id);
 
