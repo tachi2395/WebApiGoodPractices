@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using WebApiGoodPracticesSample.Web.DTO;
+using WebApiGoodPracticesSample.Web.DTO.Cars;
 using WebApiGoodPracticesSample.Web.Model;
 
 namespace WebApiGoodPracticesSample.Web.AutoMapper
@@ -8,10 +8,8 @@ namespace WebApiGoodPracticesSample.Web.AutoMapper
     {
         public CarProfile()
         {
-            CreateMap<BulkUpdateCarDto, CarModel>();
             CreateMap<CarDto, CarModel>();
-            CreateMap<CreateCarDto, CarModel>();
-            CreateMap<SingleUpdateCarDto, CarModel>();
+            CreateMap<CreateUpdateCarDto, CarModel>();
         }
     }
 }

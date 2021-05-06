@@ -1,16 +1,19 @@
+using System;
 using System.Collections.Generic;
-using WebApiGoodPracticesSample.Web.Model;
+using System.Linq.Expressions;
+using WebApiGoodPracticesSample.Web.DAL.Entities;
 
 namespace WebApiGoodPracticesSample.Web.DAL
 {
-    public interface IDataRepository
+    public interface IDataRepository<TEntity> where TEntity : CommonEntity
     {
-        IEnumerable<CarModel> Get(IEnumerable<int> ids);
-        
-        bool Create(CarModel model);
-        
-        bool Update(int id, CarModel model);
-        
+        IEnumerable<TEntity> Get(IEnumerable<int> ids);
+        IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> query);
+
+        bool Create(TEntity entity);
+
+        bool Update(int id, TEntity entity);
+
         bool Delete(int id);
     }
 }

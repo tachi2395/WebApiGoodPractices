@@ -7,6 +7,7 @@ using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Converters;
 using System;
 using WebApiGoodPracticesSample.Web.DAL;
+using WebApiGoodPracticesSample.Web.Model;
 using WebApiGoodPracticesSample.Web.Services;
 
 namespace WebApiGoodPracticesSample.Web
@@ -36,8 +37,11 @@ namespace WebApiGoodPracticesSample.Web
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-            services.AddSingleton<IDataRepository, DataRepository>();
-            services.AddSingleton<ICarService, CarService>();
+            services.AddSingleton<IDataRepository<CarModel>, DataRepository<CarModel>>();
+            services.AddSingleton<IDataRepository<DriverModel>, DataRepository<DriverModel>>();
+            services.AddSingleton<IService<CarModel>, Service<CarModel>>();
+            services.AddSingleton<IService<DriverModel>, Service<DriverModel>>();
+            services.AddSingleton<CarService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
-using WebApiGoodPracticesSample.Web.DTO;
+using WebApiGoodPracticesSample.Web.DTO.Cars;
+using WebApiGoodPracticesSample.Web.DTO.Drivers;
+using WebApiGoodPracticesSample.Web.Model;
 using WebApiGoodPracticesSample.Web.Services;
 
 namespace WebApiGoodPracticesSample.Web.Controllers
@@ -11,54 +12,62 @@ namespace WebApiGoodPracticesSample.Web.Controllers
     [Route("[controller]")]
     public class CarsController : ControllerBase
     {
-        private readonly ILogger<WeatherForecastController> _logger;
-        private readonly ICarService _carService;
+        private readonly CarService _carService;
+        private readonly IService<DriverModel> _driverService;
 
-        public CarsController(ILogger<WeatherForecastController> logger, ICarService repository)
+        public CarsController(CarService carService, IService<DriverModel> driverService)
         {
-            _logger = logger;
-            _carService = repository;
+            _carService = carService;
+            _driverService = driverService;
         }
 
         [HttpGet]
         [Route("{id}")]
         public ActionResult<CarDto> Get([FromRoute] int id)
         {
-            var dto = _carService.Get(id);
-
-            if (dto == null) return NotFound();
-
-            return Ok(dto);
+            return Ok(Get(id));
         }
 
         [HttpGet]
         [Route("")]
-        public ActionResult<CarDto> Get([FromQuery(Name = "id")] IEnumerable<int> ids)
+        public ActionResult<IEnumerable<CarDto>> Get([FromQuery(Name = "id")] IEnumerable<int> ids)
         {
             var dtos = _carService.Get(ids);
-
             if (dtos == null || !dtos.Any()) return NotFound();
 
             return Ok(dtos);
         }
 
+        [HttpGet]
+        [Route("{id}/drivers")]
+        public ActionResult<IEnumerable<DriverDto>> GetDrivers([FromRoute] int id)
+        {
+            var carDto = _carService.Get(id);
+
+            if (carDto == null) return NotFound();
+
+            var drivers = _driverService.Get(x => x.CarId == carDto.Id);
+
+            return Ok(drivers);
+        }
+
         [HttpPost]
         [Route("")]
-        public ActionResult<bool> Create([FromBody] CreateCarDto model)
+        public ActionResult<bool> Create([FromBody] CreateUpdateCarDto model)
         {
             return _carService.Create(model);
         }
 
         [HttpPut]
         [Route("")]
-        public ActionResult<bool> Update([FromBody] IEnumerable<BulkUpdateCarDto> models)
+        public ActionResult<bool> Update([FromBody] IEnumerable<CarDto> models)
         {
             return _carService.Update(models);
         }
 
         [HttpPut]
         [Route("{id}")]
-        public ActionResult<bool> Update([FromRoute] int id, [FromBody] SingleUpdateCarDto model)
+        public ActionResult<bool> Update([FromRoute] int id, [FromBody] CreateUpdateCarDto model)
         {
             return _carService.Update(id, model);
         }

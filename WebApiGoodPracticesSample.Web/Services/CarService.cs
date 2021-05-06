@@ -2,103 +2,31 @@
 using System.Collections.Generic;
 using System.Linq;
 using WebApiGoodPracticesSample.Web.DAL;
-using WebApiGoodPracticesSample.Web.DTO;
 using WebApiGoodPracticesSample.Web.Model;
 
 namespace WebApiGoodPracticesSample.Web.Services
 {
-    public class CarService : ICarService
+    public class CarService : Service<CarModel>
     {
-        private readonly IMapper _mapper;
-        private readonly IDataRepository _dataRepository;
+        private readonly IDataRepository<DriverModel> _driverRepository;
 
-        public CarService(IMapper mapper, IDataRepository dataRepository)
+        public CarService(IMapper mapper, IDataRepository<CarModel> carRepository, IDataRepository<DriverModel> driverRepository) : base(mapper, carRepository)
         {
-            _mapper = mapper;
-            _dataRepository = dataRepository;
+            _driverRepository = driverRepository;
         }
 
-        public bool Create(CreateCarDto dto)
+        public override IEnumerable<CarModel> Get(IEnumerable<int> ids)
         {
-            try
-            {
-                var model = _mapper.Map<CreateCarDto, CarModel>(dto);
+            var dtos = _dataRepository.Get(ids);
 
-                return _dataRepository.Create(model);
-            }
-            catch
-            {
-                return false;
-            }
-        }
+            if (dtos == null || !dtos.Any()) return null;
 
-        public bool Delete(int id)
-        {
-            try
+            foreach (var dto in dtos)
             {
-                return _dataRepository.Delete(id);
+                dto.Drivers = _driverRepository.Get(x => x.CarId == dto.Id);
             }
-            catch
-            {
-                return false;
-            }
-        }
 
-        public CarModel Get(int id)
-        {
-            try
-            {
-                return _dataRepository.Get(new List<int> { id }).FirstOrDefault();
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        public IEnumerable<CarModel> Get(IEnumerable<int> ids)
-        {
-            try
-            {
-                return _dataRepository.Get(ids);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        public bool Update(IEnumerable<BulkUpdateCarDto> cars)
-        {
-            try
-            {
-                foreach (var car in cars)
-                {
-                    var model = _mapper.Map<BulkUpdateCarDto, CarModel>(car);
-                    var updateResult = _dataRepository.Update(model.Id, model);
-
-                    if (!updateResult) return false;
-                }
-
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        public bool Update(int id, SingleUpdateCarDto dto)
-        {
-            try
-            {
-                var model = _mapper.Map<SingleUpdateCarDto, CarModel>(dto);
-                return _dataRepository.Update(id, model);
-            }
-            catch
-            {
-                return false;
-            }
+            return dtos;
         }
     }
 }
