@@ -18,6 +18,9 @@ namespace WebApiGoodPracticesSample.Web.Controllers
             _driverService = driverService;
         }
 
+        // todo: add heateas from driver to car
+        // todo: add car object to driver object result
+
         [HttpGet]
         [Route("{id}")]
         public ActionResult<DriverModel> Get([FromRoute] int id)
