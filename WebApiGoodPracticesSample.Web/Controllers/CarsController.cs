@@ -9,6 +9,12 @@ using static WebApiGoodPracticesSample.Web.Helpers.UrlBuilderHelper;
 
 namespace WebApiGoodPracticesSample.Web.Controllers
 {
+
+    // todo: sorting
+    // todo: field selection
+    // todo: pagination
+    // todo: security
+
     public class CarsController : ApiBaseController
     {
         private readonly ICarService _carService;
