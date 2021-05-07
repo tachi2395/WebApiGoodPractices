@@ -7,9 +7,7 @@ using WebApiGoodPracticesSample.Web.Services;
 
 namespace WebApiGoodPracticesSample.Web.Controllers
 {
-    [ApiController]
-    [Route("[controller]")]
-    public class DriversController : ControllerBase
+    public class DriversController : ApiBaseController
     {
         private readonly IService<DriverEntity> _driverService;
 

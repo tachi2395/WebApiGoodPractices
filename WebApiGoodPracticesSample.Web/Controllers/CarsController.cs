@@ -7,9 +7,7 @@ using WebApiGoodPracticesSample.Web.Services;
 
 namespace WebApiGoodPracticesSample.Web.Controllers
 {
-    [ApiController]
-    [Route("[controller]")]
-    public class CarsController : ControllerBase
+    public class CarsController : ApiBaseController
     {
         private readonly ICarService _carService;
 
@@ -81,6 +79,7 @@ namespace WebApiGoodPracticesSample.Web.Controllers
             return _carService.Update(id, model);
         }
 
+        // todo: when delete a cars, drivers are not beign deleted
         [HttpDelete]
         [Route("{id}")]
         public ActionResult<bool> Delete([FromRoute] int id)
