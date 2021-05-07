@@ -30,7 +30,13 @@ namespace WebApiGoodPracticesSample.Web.Services
             var carEntities = DataRepository.Get(ids);
 
             if (carEntities == null || !carEntities.Any()) return null;
+            var models = AddDriversAndGetModels(carEntities);
 
+            return models;
+        }
+
+        private List<CarModel> AddDriversAndGetModels(IEnumerable<CarEntity> carEntities)
+        {
             foreach (var dto in carEntities)
             {
                 dto.Drivers = _driverRepository.Get(x => x.CarId == dto.Id);
@@ -49,7 +55,6 @@ namespace WebApiGoodPracticesSample.Web.Services
                     }
                 };
             }));
-
             return models;
         }
 
@@ -81,9 +86,17 @@ namespace WebApiGoodPracticesSample.Web.Services
         {
             var filter = BuildFilterExpression(query);
 
-            var entities = DataRepository.Get(filter);
+            var entities = DataRepository.Get(filter, x => new CarEntity { 
+                Color = x.Color,
+                Drivers = x.Drivers,
+                //Model = x.Model,
+                Id = x.Id,
+                Manufaturer = x.Manufaturer,
+                Name = x.Name,
+                SerialNumber = x.SerialNumber
+            });
 
-            return Mapper.Map<IEnumerable<CarEntity>, IEnumerable<CarModel>>(entities);
+            return AddDriversAndGetModels(entities);
         }
 
         private static Expression<Func<CarEntity, bool>> BuildFilterExpression(CarQueryModel query)

@@ -8,7 +8,7 @@ namespace WebApiGoodPracticesSample.Web.Helpers
     public class EntityFillerHelper
     {
         private const int CARS = 50;
-        private const int DRIVERS = 10;
+        private const int DRIVERS = 150;
 
         public static void FillDataBase(IDataRepository<CarEntity> carRepository, IDataRepository<DriverEntity> driverRepo)
         {

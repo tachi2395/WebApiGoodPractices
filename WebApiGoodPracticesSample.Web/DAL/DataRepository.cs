@@ -28,9 +28,16 @@ namespace WebApiGoodPracticesSample.Web.DAL
             return _entitites;
         }
 
-        public IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> query)
+        public IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> query, Func<TEntity, TEntity> selector = null)
         {
-            return _entitites.Where(query.Compile()).ToList();
+            var entities = _entitites
+                .Where(query.Compile())
+                .ToList();
+
+            if (selector != null)
+                entities = entities.Select(selector).ToList();
+
+            return entities;
         }
 
         public TEntity Create(TEntity model)

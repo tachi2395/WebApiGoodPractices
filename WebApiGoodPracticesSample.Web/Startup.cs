@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System;
 using WebApiGoodPracticesSample.Web.DAL;
@@ -28,7 +29,11 @@ namespace WebApiGoodPracticesSample.Web
         {
             services
                 .AddControllers()
-                .AddNewtonsoftJson(opts => opts.SerializerSettings.Converters.Add(new StringEnumConverter()));
+                .AddNewtonsoftJson(opts =>
+                {
+                    opts.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                    opts.SerializerSettings.Converters.Add(new StringEnumConverter());
+                });
 
             services.AddApiVersioning(config =>
             {
