@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
+using WebApiGoodPracticesSample.Web.Controllers.ActionFilters;
 using WebApiGoodPracticesSample.Web.Model.Cars;
 using WebApiGoodPracticesSample.Web.Model.Drivers;
 using WebApiGoodPracticesSample.Web.Services;
@@ -18,6 +19,8 @@ namespace WebApiGoodPracticesSample.Web.Controllers
         }
 
         #region GET
+
+        // queryable get
         [HttpGet]
         [Route("")]
         public ActionResult<IEnumerable<CarModel>> Get([FromQuery(Name = "id")] IEnumerable<int> ids)
@@ -28,6 +31,7 @@ namespace WebApiGoodPracticesSample.Web.Controllers
             return dtos as List<CarModel>;
         }
 
+        // get by id
         [HttpGet]
         [Route("{id}")]
         public ActionResult<CarModel> Get([FromRoute] int id)
@@ -38,6 +42,7 @@ namespace WebApiGoodPracticesSample.Web.Controllers
             return car;
         }
 
+        // get drivers by id
         [HttpGet]
         [Route("{id}/drivers")]
         public ActionResult<IEnumerable<DriverModel>> GetDrivers([FromRoute] int id)
@@ -49,6 +54,7 @@ namespace WebApiGoodPracticesSample.Web.Controllers
             return drivers as List<DriverModel>;
         }
 
+        // get driver by car id and driver id
         [HttpGet]
         [Route("{id}/drivers/{driverId}")]
         public ActionResult<DriverModel> GetDrivers([FromRoute] int id, [FromRoute] int driverId)
@@ -61,8 +67,10 @@ namespace WebApiGoodPracticesSample.Web.Controllers
         }
         #endregion
 
+        // create
         [HttpPost]
         [Route("")]
+        [ModelValidationFilter]
         public IActionResult Create([FromBody] CreateUpdateCarModel model)
         {
             var carModel = _carService.Create<CreateUpdateCarModel, CarModel>(model);
@@ -72,8 +80,10 @@ namespace WebApiGoodPracticesSample.Web.Controllers
             return Created(UrlResourceCreated("cars", carModel.Id), carModel);
         }
 
+        // bulk update
         [HttpPut]
         [Route("")]
+        [ModelValidationFilter]
         public IActionResult Update([FromBody] IEnumerable<CarModel> models)
         {
             if (_carService.Update(models))
@@ -82,8 +92,10 @@ namespace WebApiGoodPracticesSample.Web.Controllers
             return UnprocessableEntity();
         }
 
+        // update by id
         [HttpPut]
         [Route("{id}")]
+        [ModelValidationFilter]
         public IActionResult Update([FromRoute] int id, [FromBody] CreateUpdateCarModel model)
         {
             if (_carService.Update(id, model))
@@ -92,6 +104,7 @@ namespace WebApiGoodPracticesSample.Web.Controllers
             return UnprocessableEntity();
         }
 
+        // delete
         // todo: when delete a cars, drivers are not beign deleted
         [HttpDelete]
         [Route("{id}")]

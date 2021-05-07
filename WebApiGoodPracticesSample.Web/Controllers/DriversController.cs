@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
+using WebApiGoodPracticesSample.Web.Controllers.ActionFilters;
 using WebApiGoodPracticesSample.Web.DAL.Entities;
 using WebApiGoodPracticesSample.Web.Model.Drivers;
 using WebApiGoodPracticesSample.Web.Services;
@@ -41,6 +42,7 @@ namespace WebApiGoodPracticesSample.Web.Controllers
 
         [HttpPost]
         [Route("")]
+        [ModelValidationFilter]
         public IActionResult Create([FromBody] CreateUpdateDriverModel model)
         {
             var driverModel = _driverService.Create<CreateUpdateDriverModel, DriverModel>(model);
@@ -52,6 +54,7 @@ namespace WebApiGoodPracticesSample.Web.Controllers
 
         [HttpPut]
         [Route("")]
+        [ModelValidationFilter]
         public IActionResult Update([FromBody] IEnumerable<DriverModel> models)
         {
             if (_driverService.Update(models))
@@ -62,6 +65,7 @@ namespace WebApiGoodPracticesSample.Web.Controllers
 
         [HttpPut]
         [Route("{id}")]
+        [ModelValidationFilter]
         public IActionResult Update([FromRoute] int id, [FromBody] CreateUpdateDriverModel model)
         {
             if (_driverService.Update(id, model))
