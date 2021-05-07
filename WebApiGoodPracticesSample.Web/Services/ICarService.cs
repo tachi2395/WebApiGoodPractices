@@ -10,5 +10,6 @@ namespace WebApiGoodPracticesSample.Web.Services
         public IEnumerable<DriverModel> GetDrivers(int id);
         DriverModel GetDriver(int id, int driverId);
         IEnumerable<CarModel> Get(IEnumerable<int> ids);
+        IEnumerable<CarModel> Get(CarQueryModel query);
     }
 }

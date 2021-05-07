@@ -7,7 +7,7 @@ namespace WebApiGoodPracticesSample.Web.Helpers
 {
     public class EntityFillerHelper
     {
-        private const int CARS = 3;
+        private const int CARS = 50;
         private const int DRIVERS = 10;
 
         public static void FillDataBase(IDataRepository<CarEntity> carRepository, IDataRepository<DriverEntity> driverRepo)
@@ -38,7 +38,7 @@ namespace WebApiGoodPracticesSample.Web.Helpers
                     Id = 0,
                     Age = new Random().Next(19, 65),
                     LastName = _lastNames[new Random().Next(_lastNames.Count)],
-                    Name = _names[new Random().Next(_names.Count)],
+                    Name = _driverNames[new Random().Next(_driverNames.Count)],
                     CarId = cars[new Random().Next(cars.Count)].Id,
                 });
             }
@@ -61,7 +61,7 @@ namespace WebApiGoodPracticesSample.Web.Helpers
             "Gonzalez"
         };
 
-        private static List<string> _names = new()
+        private static List<string> _driverNames = new()
         {
             "Noah",
             "Emma",
@@ -98,28 +98,28 @@ namespace WebApiGoodPracticesSample.Web.Helpers
             "Oasis",
             "Sonoma",
             "Accent",
-            "Corolla",
-            "Grand Am",
-            "Odyssey",
-            "Sorento",
-            "Acclaim",
-            "Coronet",
-            "Grand Prix",
-            "Omega",
-            "Soul",
-            "Accord",
-            "Corrado",
-            "Grand Vitara",
-            "Omni",
-            "Spark",
-            "Achieva",
-            "Corsair",
-            "Grand Voyager",
-            "Optima",
-            "Spectra",
-            "Aerio",
-            "Corsica Greiz",
-            "Outback Spectrum"
+            //"Corolla",
+            //"Grand Am",
+            //"Odyssey",
+            //"Sorento",
+            //"Acclaim",
+            //"Coronet",
+            //"Grand Prix",
+            //"Omega",
+            //"Soul",
+            //"Accord",
+            //"Corrado",
+            //"Grand Vitara",
+            //"Omni",
+            //"Spark",
+            //"Achieva",
+            //"Corsair",
+            //"Grand Voyager",
+            //"Optima",
+            //"Spectra",
+            //"Aerio",
+            //"Corsica Greiz",
+            //"Outback Spectrum"
         };
 
         private static List<string> _manufacturers = new()

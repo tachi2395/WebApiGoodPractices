@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using WebApiGoodPracticesSample.Web.DAL;
 using WebApiGoodPracticesSample.Web.DAL.Entities;
 using WebApiGoodPracticesSample.Web.Model.Cars;
@@ -73,6 +75,43 @@ namespace WebApiGoodPracticesSample.Web.Services
             var driverEntity = drivers?.Where(x => x.Id == driverId)?.FirstOrDefault();
 
             return Mapper.Map<DriverEntity, DriverModel>(driverEntity);
+        }
+
+        public IEnumerable<CarModel> Get(CarQueryModel query)
+        {
+            var filter = BuildFilterExpression(query);
+
+            var entities = DataRepository.Get(filter);
+
+            return Mapper.Map<IEnumerable<CarEntity>, IEnumerable<CarModel>>(entities);
+        }
+
+        private static Expression<Func<CarEntity, bool>> BuildFilterExpression(CarQueryModel query)
+        {
+            Expression<Func<CarEntity, bool>> filter = x => true;
+
+            // by id
+            if (query.Id != null && query.Id.Any())
+            {
+                var prefix = filter.Compile();
+                filter = x => prefix(x) && query.Id.Contains(x.Id);
+            }
+
+            // by name
+            if (query.Name != null && query.Name.Any())
+            {
+                var prefix = filter.Compile();
+                filter = x => prefix(x) && query.Name.Contains(x.Name);
+            }
+
+            // by manufacturer
+            if (query.Manufaturer != null && query.Manufaturer.Any())
+            {
+                var prefix = filter.Compile();
+                filter = x => prefix(x) && query.Manufaturer.Contains(x.Manufaturer);
+            }
+
+            return filter;
         }
     }
 }

@@ -23,12 +23,13 @@ namespace WebApiGoodPracticesSample.Web.Controllers
         // queryable get
         [HttpGet]
         [Route("")]
-        public ActionResult<IEnumerable<CarModel>> Get([FromQuery(Name = "id")] IEnumerable<int> ids)
+        public ActionResult<IEnumerable<CarModel>> Get([FromQuery] CarQueryModel query)
         {
-            var dtos = _carService.Get(ids);
-            if (dtos == null || !dtos.Any()) return NotFound();
+            var models = _carService.Get(query);
 
-            return dtos as List<CarModel>;
+            if (models == null || !models.Any()) return NotFound();
+
+            return models as List<CarModel>;
         }
 
         // get by id
