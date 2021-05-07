@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using WebApiGoodPracticesSample.Web.DAL.Entities;
-using WebApiGoodPracticesSample.Web.DTO.Drivers;
+using WebApiGoodPracticesSample.Web.Model.Drivers;
 
 namespace WebApiGoodPracticesSample.Web.AutoMapper
 {
@@ -8,8 +8,8 @@ namespace WebApiGoodPracticesSample.Web.AutoMapper
     {
         public DriverProfile()
         {
-            CreateMap<DriverDto, DriverEntity>();
-            CreateMap<CreateUpdateDriverDto, DriverEntity>();
+            CreateMap<DriverModel, DriverEntity>();
+            CreateMap<CreateUpdateDriverModel, DriverEntity>();
         }
     }
 }

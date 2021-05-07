@@ -1,6 +1,6 @@
-﻿namespace WebApiGoodPracticesSample.Web.DTO.Drivers
+﻿namespace WebApiGoodPracticesSample.Web.Model.Drivers
 {
-    public class DriverDto
+    public class DriverModel
     {
         public int Id { get; set; }
         public string Name { get; set; }

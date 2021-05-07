@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
-using WebApiGoodPracticesSample.Web.DTO.Cars;
-using WebApiGoodPracticesSample.Web.DTO.Drivers;
+using WebApiGoodPracticesSample.Web.Model.Cars;
+using WebApiGoodPracticesSample.Web.Model.Drivers;
 using WebApiGoodPracticesSample.Web.Services;
 
 namespace WebApiGoodPracticesSample.Web.Controllers
@@ -20,7 +20,7 @@ namespace WebApiGoodPracticesSample.Web.Controllers
 
         [HttpGet]
         [Route("{id}")]
-        public ActionResult<CarDto> Get([FromRoute] int id)
+        public ActionResult<CarModel> Get([FromRoute] int id)
         {
             var car = _carService.Get(id);
             if (car == null) return NotFound();
@@ -30,7 +30,7 @@ namespace WebApiGoodPracticesSample.Web.Controllers
 
         [HttpGet]
         [Route("")]
-        public ActionResult<IEnumerable<CarDto>> Get([FromQuery(Name = "id")] IEnumerable<int> ids)
+        public ActionResult<IEnumerable<CarModel>> Get([FromQuery(Name = "id")] IEnumerable<int> ids)
         {
             var dtos = _carService.Get(ids);
             if (dtos == null || !dtos.Any()) return NotFound();
@@ -40,7 +40,7 @@ namespace WebApiGoodPracticesSample.Web.Controllers
 
         [HttpGet]
         [Route("{id}/drivers")]
-        public ActionResult<IEnumerable<DriverDto>> GetDrivers([FromRoute] int id)
+        public ActionResult<IEnumerable<DriverModel>> GetDrivers([FromRoute] int id)
         {
             var drivers = _carService.GetDrivers(id);
 
@@ -49,23 +49,34 @@ namespace WebApiGoodPracticesSample.Web.Controllers
             return Ok(drivers);
         }
 
+        [HttpGet]
+        [Route("{id}/drivers/{driverId}")]
+        public ActionResult<IEnumerable<DriverModel>> GetDrivers([FromRoute] int id, [FromRoute] int driverId)
+        {
+            var driver = _carService.GetDriver(id, driverId);
+
+            if (driver == null || driver == default) return NotFound();
+
+            return Ok(driver);
+        }
+
         [HttpPost]
         [Route("")]
-        public ActionResult<bool> Create([FromBody] CreateUpdateCarDto model)
+        public ActionResult<bool> Create([FromBody] CreateUpdateCarModel model)
         {
             return _carService.Create(model);
         }
 
         [HttpPut]
         [Route("")]
-        public ActionResult<bool> Update([FromBody] IEnumerable<CarDto> models)
+        public ActionResult<bool> Update([FromBody] IEnumerable<CarModel> models)
         {
             return _carService.Update(models);
         }
 
         [HttpPut]
         [Route("{id}")]
-        public ActionResult<bool> Update([FromRoute] int id, [FromBody] CreateUpdateCarDto model)
+        public ActionResult<bool> Update([FromRoute] int id, [FromBody] CreateUpdateCarModel model)
         {
             return _carService.Update(id, model);
         }

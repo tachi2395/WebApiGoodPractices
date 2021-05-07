@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using WebApiGoodPracticesSample.Web.DAL.Entities;
-using WebApiGoodPracticesSample.Web.DTO.Drivers;
+using WebApiGoodPracticesSample.Web.Model.Drivers;
 using WebApiGoodPracticesSample.Web.Services;
 
 namespace WebApiGoodPracticesSample.Web.Controllers
@@ -20,7 +20,7 @@ namespace WebApiGoodPracticesSample.Web.Controllers
 
         [HttpGet]
         [Route("{id}")]
-        public ActionResult<DriverDto> Get([FromRoute] int id)
+        public ActionResult<DriverModel> Get([FromRoute] int id)
         {
             var dto = _carService.Get(id);
 
@@ -31,7 +31,7 @@ namespace WebApiGoodPracticesSample.Web.Controllers
 
         [HttpGet]
         [Route("")]
-        public ActionResult<DriverDto> Get([FromQuery(Name = "id")] IEnumerable<int> ids)
+        public ActionResult<DriverModel> Get([FromQuery(Name = "id")] IEnumerable<int> ids)
         {
             var dtos = _carService.Get(ids);
 
@@ -42,21 +42,21 @@ namespace WebApiGoodPracticesSample.Web.Controllers
 
         [HttpPost]
         [Route("")]
-        public ActionResult<bool> Create([FromBody] CreateUpdateDriverDto model)
+        public ActionResult<bool> Create([FromBody] CreateUpdateDriverModel model)
         {
             return _carService.Create(model);
         }
 
         [HttpPut]
         [Route("")]
-        public ActionResult<bool> Update([FromBody] IEnumerable<DriverDto> models)
+        public ActionResult<bool> Update([FromBody] IEnumerable<DriverModel> models)
         {
             return _carService.Update(models);
         }
 
         [HttpPut]
         [Route("{id}")]
-        public ActionResult<bool> Update([FromRoute] int id, [FromBody] CreateUpdateDriverDto model)
+        public ActionResult<bool> Update([FromRoute] int id, [FromBody] CreateUpdateDriverModel model)
         {
             return _carService.Update(id, model);
         }
