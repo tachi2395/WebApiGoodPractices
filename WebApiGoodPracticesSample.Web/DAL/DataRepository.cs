@@ -58,7 +58,10 @@ namespace WebApiGoodPracticesSample.Web.DAL
 
         public bool Delete(int id)
         {
-            _entitites.RemoveAll(x => x.Id == id);
+            if (_entitites.Exists(x => x.Id == id))
+                _entitites.RemoveAll(x => x.Id == id);
+            else
+                throw new IndexOutOfRangeException();
 
             return true;
         }
