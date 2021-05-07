@@ -11,31 +11,31 @@ namespace WebApiGoodPracticesSample.Web.Controllers
     [Route("[controller]")]
     public class CarsController : ControllerBase
     {
-        private readonly CarService _carService;
+        private readonly ICarService _carService;
 
-        public CarsController(CarService carService)
+        public CarsController(ICarService carService)
         {
             _carService = carService;
-        }
-
-        [HttpGet]
-        [Route("{id}")]
-        public ActionResult<CarModel> Get([FromRoute] int id)
-        {
-            var car = _carService.Get(id);
-            if (car == null) return NotFound();
-
-            return Ok(car);
         }
 
         [HttpGet]
         [Route("")]
         public ActionResult<IEnumerable<CarModel>> Get([FromQuery(Name = "id")] IEnumerable<int> ids)
         {
-            var dtos = _carService.Get(ids);
+            var dtos = _carService.Get<CarModel>(ids);
             if (dtos == null || !dtos.Any()) return NotFound();
 
-            return Ok(dtos);
+            return dtos as List<CarModel>;
+        }
+
+        [HttpGet]
+        [Route("{id}")]
+        public ActionResult<CarModel> Get([FromRoute] int id)
+        {
+            var car = _carService.Get<CarModel>(id);
+            if (car == null) return NotFound();
+
+            return car;
         }
 
         [HttpGet]
@@ -46,18 +46,18 @@ namespace WebApiGoodPracticesSample.Web.Controllers
 
             if (drivers == null || !drivers.Any()) return NotFound();
 
-            return Ok(drivers);
+            return drivers as List<DriverModel>;
         }
 
         [HttpGet]
         [Route("{id}/drivers/{driverId}")]
-        public ActionResult<IEnumerable<DriverModel>> GetDrivers([FromRoute] int id, [FromRoute] int driverId)
+        public ActionResult<DriverModel> GetDrivers([FromRoute] int id, [FromRoute] int driverId)
         {
             var driver = _carService.GetDriver(id, driverId);
 
             if (driver == null || driver == default) return NotFound();
 
-            return Ok(driver);
+            return driver;
         }
 
         [HttpPost]

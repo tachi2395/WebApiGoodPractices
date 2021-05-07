@@ -10,6 +10,8 @@ namespace WebApiGoodPracticesSample.Web.AutoMapper
         {
             CreateMap<CarModel, CarEntity>();
             CreateMap<CreateUpdateCarModel, CarEntity>();
+
+            CreateMap<CarEntity, CarModel>();
         }
     }
 }

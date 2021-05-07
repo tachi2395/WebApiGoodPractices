@@ -10,6 +10,8 @@ namespace WebApiGoodPracticesSample.Web.AutoMapper
         {
             CreateMap<DriverModel, DriverEntity>();
             CreateMap<CreateUpdateDriverModel, DriverEntity>();
+
+            CreateMap<DriverEntity, DriverModel>();
         }
     }
 }

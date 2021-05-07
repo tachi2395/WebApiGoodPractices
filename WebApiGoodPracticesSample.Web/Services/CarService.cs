@@ -1,10 +1,9 @@
 ﻿using AutoMapper;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using WebApiGoodPracticesSample.Web.DAL;
 using WebApiGoodPracticesSample.Web.DAL.Entities;
+using WebApiGoodPracticesSample.Web.Model.Drivers;
 
 namespace WebApiGoodPracticesSample.Web.Services
 {
@@ -17,40 +16,47 @@ namespace WebApiGoodPracticesSample.Web.Services
             _driverRepository = driverRepository;
         }
 
-        public override IEnumerable<CarEntity> Get(IEnumerable<int> ids)
+        public override TModel Get<TModel>(int id)
         {
-            var dtos = _dataRepository.Get(ids);
+            return Get<TModel>(new List<int> { id }).FirstOrDefault();
+        }
 
-            if (dtos == null || !dtos.Any()) return null;
+        public override IEnumerable<TModel> Get<TModel>(IEnumerable<int> ids)
+        {
+            var carEntities = DataRepository.Get(ids);
 
-            foreach (var dto in dtos)
+            if (carEntities == null || !carEntities.Any()) return null;
+
+            foreach (var dto in carEntities)
             {
                 dto.Drivers = _driverRepository.Get(x => x.CarId == dto.Id);
             }
 
-            return dtos;
+            return Mapper.Map<IEnumerable<CarEntity>, IEnumerable<TModel>>(carEntities);
         }
 
-        public IEnumerable<DriverEntity> GetDrivers(int id)
+        public IEnumerable<DriverModel> GetDrivers(int id)
         {
-            var car = _dataRepository.Get(id);
+            var car = DataRepository.Get(id);
+
+            if (car == null) return null;
+
+            var driverEntities = _driverRepository.Get(x => x.CarId == car.Id);
+
+            return Mapper.Map<IEnumerable<DriverEntity>, IEnumerable<DriverModel>>(driverEntities);
+        }
+
+        public DriverModel GetDriver(int id, int driverId)
+        {
+            var car = DataRepository.Get(id);
 
             if (car == null) return null;
 
             var drivers = _driverRepository.Get(x => x.CarId == car.Id);
 
-            return drivers;
-        }
+            var driverEntity = drivers?.Where(x => x.Id == driverId)?.FirstOrDefault();
 
-        public DriverEntity GetDriver(int id, int driverId)
-        {
-            var car = _dataRepository.Get(id);
-
-            if (car == null) return null;
-
-            var drivers = _driverRepository.Get(x => x.CarId == car.Id);
-
-            return drivers?.Where(x => x.Id == driverId)?.FirstOrDefault();
+            return Mapper.Map<DriverEntity, DriverModel>(driverEntity);
         }
     }
 }
