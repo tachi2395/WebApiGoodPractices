@@ -4,6 +4,7 @@ using System.Linq;
 using WebApiGoodPracticesSample.Web.DAL.Entities;
 using WebApiGoodPracticesSample.Web.Model.Drivers;
 using WebApiGoodPracticesSample.Web.Services;
+using static WebApiGoodPracticesSample.Web.Helpers.UrlBuilderHelper;
 
 namespace WebApiGoodPracticesSample.Web.Controllers
 {
@@ -40,30 +41,43 @@ namespace WebApiGoodPracticesSample.Web.Controllers
 
         [HttpPost]
         [Route("")]
-        public ActionResult<bool> Create([FromBody] CreateUpdateDriverModel model)
+        public IActionResult Create([FromBody] CreateUpdateDriverModel model)
         {
-            return _driverService.Create(model);
+            var driverModel = _driverService.Create<CreateUpdateDriverModel, DriverModel>(model);
+
+            if (driverModel == null) return UnprocessableEntity();
+
+            return Created(UrlResourceCreated("drivers", driverModel.Id), driverModel);
         }
 
         [HttpPut]
         [Route("")]
-        public ActionResult<bool> Update([FromBody] IEnumerable<DriverModel> models)
+        public IActionResult Update([FromBody] IEnumerable<DriverModel> models)
         {
-            return _driverService.Update(models);
+            if (_driverService.Update(models))
+                return NoContent();
+
+            return UnprocessableEntity();
         }
 
         [HttpPut]
         [Route("{id}")]
-        public ActionResult<bool> Update([FromRoute] int id, [FromBody] CreateUpdateDriverModel model)
+        public IActionResult Update([FromRoute] int id, [FromBody] CreateUpdateDriverModel model)
         {
-            return _driverService.Update(id, model);
+            if (_driverService.Update(id, model))
+                return NoContent();
+
+            return UnprocessableEntity();
         }
 
         [HttpDelete]
         [Route("{id}")]
-        public ActionResult<bool> Delete([FromRoute] int id)
+        public IActionResult Delete([FromRoute] int id)
         {
-            return _driverService.Delete(id);
+            if (_driverService.Delete(id))
+                return NoContent();
+
+            return UnprocessableEntity();
         }
     }
 }

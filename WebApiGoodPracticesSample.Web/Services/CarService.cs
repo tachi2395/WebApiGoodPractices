@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using WebApiGoodPracticesSample.Web.DAL;
 using WebApiGoodPracticesSample.Web.DAL.Entities;
+using WebApiGoodPracticesSample.Web.Model.Cars;
+using WebApiGoodPracticesSample.Web.Model.Common;
 using WebApiGoodPracticesSample.Web.Model.Drivers;
 
 namespace WebApiGoodPracticesSample.Web.Services
@@ -21,7 +23,7 @@ namespace WebApiGoodPracticesSample.Web.Services
             return Get<TModel>(new List<int> { id }).FirstOrDefault();
         }
 
-        public override IEnumerable<TModel> Get<TModel>(IEnumerable<int> ids)
+        public IEnumerable<CarModel> Get(IEnumerable<int> ids)
         {
             var carEntities = DataRepository.Get(ids);
 
@@ -32,7 +34,21 @@ namespace WebApiGoodPracticesSample.Web.Services
                 dto.Drivers = _driverRepository.Get(x => x.CarId == dto.Id);
             }
 
-            return Mapper.Map<IEnumerable<CarEntity>, IEnumerable<TModel>>(carEntities);
+            var models = Mapper.Map<IEnumerable<CarEntity>, IEnumerable<CarModel>>(carEntities) as List<CarModel>;
+
+            models.ForEach(x => (x.Drivers as List<DriverModel>).ForEach(d =>
+            {
+                d.Links = new List<LinkObjModel>
+                {
+                    new LinkObjModel
+                    {
+                        Rel="self",
+                        Href = $"/api/v1/drivers/{d?.Id}"
+                    }
+                };
+            }));
+
+            return models;
         }
 
         public IEnumerable<DriverModel> GetDrivers(int id)

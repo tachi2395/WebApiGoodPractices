@@ -18,17 +18,19 @@ namespace WebApiGoodPracticesSample.Web.Services
             DataRepository = dataRepository;
         }
 
-        public bool Create<TModel>(TModel dto)
+        public TModelOut Create<TModelIn, TModelOut>(TModelIn model)
         {
             try
             {
-                var model = Mapper.Map<TModel, TEntity>(dto);
+                var entityModel = Mapper.Map<TModelIn, TEntity>(model);
 
-                return DataRepository.Create(model);
+                var entity = DataRepository.Create(entityModel);
+
+                return Mapper.Map<TEntity, TModelOut>(entity);
             }
             catch
             {
-                return false;
+                return default;
             }
         }
 

@@ -13,7 +13,7 @@ namespace WebApiGoodPracticesSample.Web.Services
         IEnumerable<TModel> Get<TModel>(Expression<Func<TEntity, bool>> query);
 
         // create
-        bool Create<TModel>(TModel dto);
+        TModelOut Create<TModelIn, TModelOut>(TModelIn model);
 
         // update
         bool Update<TModel>(IEnumerable<TModel> cars);

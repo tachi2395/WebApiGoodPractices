@@ -33,7 +33,7 @@ namespace WebApiGoodPracticesSample.Web.DAL
             return _entitites.Where(query.Compile()).ToList();
         }
 
-        public bool Create(TEntity model)
+        public TEntity Create(TEntity model)
         {
             if (_entitites.Any())
                 model.Id = _entitites.Max(x => x.Id) + 1;
@@ -42,7 +42,7 @@ namespace WebApiGoodPracticesSample.Web.DAL
 
             _entitites.Add(model);
 
-            return true;
+            return _entitites.First(x => x.Id == model.Id);
         }
 
         public bool Update(int id, TEntity model)

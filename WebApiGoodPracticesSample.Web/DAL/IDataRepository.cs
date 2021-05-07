@@ -11,7 +11,7 @@ namespace WebApiGoodPracticesSample.Web.DAL
         IEnumerable<TEntity> Get(IEnumerable<int> ids);
         IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> query);
 
-        bool Create(TEntity entity);
+        TEntity Create(TEntity entity);
 
         bool Update(int id, TEntity entity);
 

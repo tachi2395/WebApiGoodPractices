@@ -4,6 +4,7 @@ using System.Linq;
 using WebApiGoodPracticesSample.Web.Model.Cars;
 using WebApiGoodPracticesSample.Web.Model.Drivers;
 using WebApiGoodPracticesSample.Web.Services;
+using static WebApiGoodPracticesSample.Web.Helpers.UrlBuilderHelper;
 
 namespace WebApiGoodPracticesSample.Web.Controllers
 {
@@ -16,11 +17,12 @@ namespace WebApiGoodPracticesSample.Web.Controllers
             _carService = carService;
         }
 
+        #region GET
         [HttpGet]
         [Route("")]
         public ActionResult<IEnumerable<CarModel>> Get([FromQuery(Name = "id")] IEnumerable<int> ids)
         {
-            var dtos = _carService.Get<CarModel>(ids);
+            var dtos = _carService.Get(ids);
             if (dtos == null || !dtos.Any()) return NotFound();
 
             return dtos as List<CarModel>;
@@ -57,34 +59,48 @@ namespace WebApiGoodPracticesSample.Web.Controllers
 
             return driver;
         }
+        #endregion
 
         [HttpPost]
         [Route("")]
-        public ActionResult<bool> Create([FromBody] CreateUpdateCarModel model)
+        public IActionResult Create([FromBody] CreateUpdateCarModel model)
         {
-            return _carService.Create(model);
+            var carModel = _carService.Create<CreateUpdateCarModel, CarModel>(model);
+
+            if (carModel == null) return UnprocessableEntity();
+
+            return Created(UrlResourceCreated("cars", carModel.Id), carModel);
         }
 
         [HttpPut]
         [Route("")]
-        public ActionResult<bool> Update([FromBody] IEnumerable<CarModel> models)
+        public IActionResult Update([FromBody] IEnumerable<CarModel> models)
         {
-            return _carService.Update(models);
+            if (_carService.Update(models))
+                return NoContent();
+
+            return UnprocessableEntity();
         }
 
         [HttpPut]
         [Route("{id}")]
-        public ActionResult<bool> Update([FromRoute] int id, [FromBody] CreateUpdateCarModel model)
+        public IActionResult Update([FromRoute] int id, [FromBody] CreateUpdateCarModel model)
         {
-            return _carService.Update(id, model);
+            if (_carService.Update(id, model))
+                return NoContent();
+
+            return UnprocessableEntity();
         }
 
         // todo: when delete a cars, drivers are not beign deleted
         [HttpDelete]
         [Route("{id}")]
-        public ActionResult<bool> Delete([FromRoute] int id)
+        public IActionResult Delete([FromRoute] int id)
         {
-            return _carService.Delete(id);
+            if (_carService.Delete(id))
+                return NoContent();
+
+            return UnprocessableEntity();
         }
     }
 }

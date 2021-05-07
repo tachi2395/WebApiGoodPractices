@@ -1,4 +1,7 @@
-﻿namespace WebApiGoodPracticesSample.Web.Model.Drivers
+﻿using System.Collections.Generic;
+using WebApiGoodPracticesSample.Web.Model.Common;
+
+namespace WebApiGoodPracticesSample.Web.Model.Drivers
 {
     public class DriverModel
     {
@@ -7,5 +10,6 @@
         public string LastName { get; set; }
         public int Age { get; set; }
         public int CarId { get; set; }
+        public IEnumerable<LinkObjModel> Links { get; set; }
     }
 }
