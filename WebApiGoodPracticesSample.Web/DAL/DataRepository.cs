@@ -15,6 +15,11 @@ namespace WebApiGoodPracticesSample.Web.DAL
             _entitites = new List<TEntity>();
         }
 
+        public TEntity Get(int id)
+        {
+            return _entitites.Where(x => x.Id == id).FirstOrDefault();
+        }
+
         public IEnumerable<TEntity> Get(IEnumerable<int> ids)
         {
             if (ids != null && ids.Any())
@@ -23,12 +28,19 @@ namespace WebApiGoodPracticesSample.Web.DAL
             return _entitites;
         }
 
-        public IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> query)
+        public IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> query, Func<TEntity, TEntity> selector = null)
         {
-            return _entitites.Where(query.Compile()).ToList();
+            var entities = _entitites
+                .Where(query.Compile())
+                .ToList();
+
+            if (selector != null)
+                entities = entities.Select(selector).ToList();
+
+            return entities;
         }
 
-        public bool Create(TEntity model)
+        public TEntity Create(TEntity model)
         {
             if (_entitites.Any())
                 model.Id = _entitites.Max(x => x.Id) + 1;
@@ -37,7 +49,7 @@ namespace WebApiGoodPracticesSample.Web.DAL
 
             _entitites.Add(model);
 
-            return true;
+            return _entitites.First(x => x.Id == model.Id);
         }
 
         public bool Update(int id, TEntity model)
@@ -53,7 +65,10 @@ namespace WebApiGoodPracticesSample.Web.DAL
 
         public bool Delete(int id)
         {
-            _entitites.RemoveAll(x => x.Id == id);
+            if (_entitites.Exists(x => x.Id == id))
+                _entitites.RemoveAll(x => x.Id == id);
+            else
+                throw new IndexOutOfRangeException();
 
             return true;
         }

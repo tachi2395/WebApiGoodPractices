@@ -1,35 +1,36 @@
 ﻿using AutoMapper;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using WebApiGoodPracticesSample.Web.DAL;
 using WebApiGoodPracticesSample.Web.DAL.Entities;
 
 namespace WebApiGoodPracticesSample.Web.Services
 {
-    public class Service<TModel> : IService<TModel> where TModel : CommonEntity
+    public class Service<TEntity> : IService<TEntity> where TEntity : CommonEntity
     {
-        private readonly IMapper _mapper;
-        protected readonly IDataRepository<TModel> _dataRepository;
+        protected readonly IMapper Mapper;
+        protected readonly IDataRepository<TEntity> DataRepository;
 
-        public Service(IMapper mapper, IDataRepository<TModel> dataRepository)
+        public Service(IMapper mapper, IDataRepository<TEntity> dataRepository)
         {
-            _mapper = mapper;
-            _dataRepository = dataRepository;
+            Mapper = mapper;
+            DataRepository = dataRepository;
         }
 
-        public bool Create<TDto>(TDto dto)
+        public TModelOut Create<TModelIn, TModelOut>(TModelIn model)
         {
             try
             {
-                var model = _mapper.Map<TDto, TModel>(dto);
+                var entityModel = Mapper.Map<TModelIn, TEntity>(model);
 
-                return _dataRepository.Create(model);
+                var entity = DataRepository.Create(entityModel);
+
+                return Mapper.Map<TEntity, TModelOut>(entity);
             }
             catch
             {
-                return false;
+                return default;
             }
         }
 
@@ -37,7 +38,7 @@ namespace WebApiGoodPracticesSample.Web.Services
         {
             try
             {
-                return _dataRepository.Delete(id);
+                return DataRepository.Delete(id);
             }
             catch
             {
@@ -45,11 +46,28 @@ namespace WebApiGoodPracticesSample.Web.Services
             }
         }
 
-        public virtual TModel Get(int id)
+        #region GET
+        public virtual TModel Get<TModel>(int id)
         {
             try
             {
-                return Get(new List<int> { id }).FirstOrDefault();
+                var entity = DataRepository.Get(id);
+
+                return Mapper.Map<TEntity, TModel>(entity);
+            }
+            catch
+            {
+                return default;
+            }
+        }
+
+        public virtual IEnumerable<TModel> Get<TModel>(IEnumerable<int> ids)
+        {
+            try
+            {
+                var entities = DataRepository.Get(ids);
+
+                return Mapper.Map<IEnumerable<TEntity>, IEnumerable<TModel>>(entities);
             }
             catch
             {
@@ -57,38 +75,29 @@ namespace WebApiGoodPracticesSample.Web.Services
             }
         }
 
-        public virtual IEnumerable<TModel> Get(IEnumerable<int> ids)
+        public IEnumerable<TModel> Get<TModel>(Expression<Func<TEntity, bool>> query)
         {
             try
             {
-                return _dataRepository.Get(ids);
+                var entities = DataRepository.Get(query);
+
+                return Mapper.Map<IEnumerable<TEntity>, IEnumerable<TModel>>(entities);
             }
             catch
             {
                 return null;
             }
         }
+        #endregion GET
 
-        public IEnumerable<TModel> Get(Expression<Func<TModel, bool>> query)
-        {
-            try
-            {
-                return _dataRepository.Get(query);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        public bool Update<TDto>(IEnumerable<TDto> cars)
+        public bool Update<TModel>(IEnumerable<TModel> cars)
         {
             try
             {
                 foreach (var car in cars)
                 {
-                    var model = _mapper.Map<TDto, TModel>(car);
-                    var updateResult = _dataRepository.Update(model.Id, model);
+                    var model = Mapper.Map<TModel, TEntity>(car);
+                    var updateResult = DataRepository.Update(model.Id, model);
 
                     if (!updateResult) return false;
                 }
@@ -101,12 +110,12 @@ namespace WebApiGoodPracticesSample.Web.Services
             }
         }
 
-        public bool Update<TDto>(int id, TDto dto)
+        public bool Update<TModel>(int id, TModel dto)
         {
             try
             {
-                var model = _mapper.Map<TDto, TModel>(dto);
-                return _dataRepository.Update(id, model);
+                var model = Mapper.Map<TModel, TEntity>(dto);
+                return DataRepository.Update(id, model);
             }
             catch
             {

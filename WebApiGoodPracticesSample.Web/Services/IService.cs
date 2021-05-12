@@ -5,19 +5,19 @@ using WebApiGoodPracticesSample.Web.DAL.Entities;
 
 namespace WebApiGoodPracticesSample.Web.Services
 {
-    public interface IService<TModel> where TModel : CommonEntity
+    public interface IService<TEntity> where TEntity : CommonEntity
     {
         // get
-        TModel Get(int id);
-        IEnumerable<TModel> Get(IEnumerable<int> ids);
-        IEnumerable<TModel> Get(Expression<Func<TModel, bool>> query);
+        TModel Get<TModel>(int id);
+        IEnumerable<TModel> Get<TModel>(IEnumerable<int> ids);
+        IEnumerable<TModel> Get<TModel>(Expression<Func<TEntity, bool>> query);
 
         // create
-        bool Create<TDto>(TDto dto);
+        TModelOut Create<TModelIn, TModelOut>(TModelIn model);
 
         // update
-        bool Update<TDto>(IEnumerable<TDto> cars);
-        bool Update<TDto>(int id, TDto model);
+        bool Update<TModel>(IEnumerable<TModel> cars);
+        bool Update<TModel>(int id, TModel model);
 
         // delete
         bool Delete(int id);

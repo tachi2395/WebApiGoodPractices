@@ -1,13 +1,16 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System;
 using WebApiGoodPracticesSample.Web.DAL;
-using WebApiGoodPracticesSample.Web.Model;
+using WebApiGoodPracticesSample.Web.DAL.Entities;
+using WebApiGoodPracticesSample.Web.Helpers;
 using WebApiGoodPracticesSample.Web.Services;
 
 namespace WebApiGoodPracticesSample.Web
@@ -26,7 +29,16 @@ namespace WebApiGoodPracticesSample.Web
         {
             services
                 .AddControllers()
-                .AddNewtonsoftJson(opts => opts.SerializerSettings.Converters.Add(new StringEnumConverter()));
+                .AddNewtonsoftJson(opts =>
+                {
+                    opts.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                    opts.SerializerSettings.Converters.Add(new StringEnumConverter());
+                });
+
+            services.AddApiVersioning(config =>
+            {
+                config.DefaultApiVersion = new ApiVersion(1, 0);
+            });
 
             services.AddSwaggerGen(c =>
             {
@@ -37,15 +49,18 @@ namespace WebApiGoodPracticesSample.Web
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-            services.AddSingleton<IDataRepository<CarModel>, DataRepository<CarModel>>();
-            services.AddSingleton<IDataRepository<DriverModel>, DataRepository<DriverModel>>();
-            services.AddSingleton<IService<CarModel>, Service<CarModel>>();
-            services.AddSingleton<IService<DriverModel>, Service<DriverModel>>();
-            services.AddSingleton<CarService>();
+            services.AddSingleton<IDataRepository<CarEntity>, DataRepository<CarEntity>>();
+            services.AddSingleton<IDataRepository<DriverEntity>, DataRepository<DriverEntity>>();
+            services.AddSingleton<IService<CarEntity>, Service<CarEntity>>();
+            services.AddSingleton<IService<DriverEntity>, Service<DriverEntity>>();
+            services.AddSingleton<ICarService, CarService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app,
+            IWebHostEnvironment env,
+            IDataRepository<CarEntity> carRepository,
+            IDataRepository<DriverEntity> driverRepo)
         {
             if (env.IsDevelopment())
             {
@@ -64,6 +79,8 @@ namespace WebApiGoodPracticesSample.Web
             {
                 endpoints.MapControllers();
             });
+
+            EntityFillerHelper.FillDataBase(carRepository, driverRepo);
         }
     }
 }

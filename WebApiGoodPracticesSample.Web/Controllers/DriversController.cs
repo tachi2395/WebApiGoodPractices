@@ -1,71 +1,90 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
-using WebApiGoodPracticesSample.Web.DTO.Drivers;
-using WebApiGoodPracticesSample.Web.Model;
+using WebApiGoodPracticesSample.Web.Controllers.ActionFilters;
+using WebApiGoodPracticesSample.Web.DAL.Entities;
+using WebApiGoodPracticesSample.Web.Model.Drivers;
 using WebApiGoodPracticesSample.Web.Services;
+using static WebApiGoodPracticesSample.Web.Helpers.UrlBuilderHelper;
 
 namespace WebApiGoodPracticesSample.Web.Controllers
 {
-    [ApiController]
-    [Route("[controller]")]
-    public class DriversController : ControllerBase
+    public class DriversController : ApiBaseController
     {
-        private readonly IService<DriverModel> _carService;
+        private readonly IService<DriverEntity> _driverService;
 
-        public DriversController(IService<DriverModel> repository)
+        public DriversController(IService<DriverEntity> driverService)
         {
-            _carService = repository;
+            _driverService = driverService;
         }
+
+        // todo: add heateas from driver to car
+        // todo: add car object to driver object result
 
         [HttpGet]
         [Route("{id}")]
-        public ActionResult<DriverDto> Get([FromRoute] int id)
+        public ActionResult<DriverModel> Get([FromRoute] int id)
         {
-            var dto = _carService.Get(id);
+            var dto = _driverService.Get<DriverModel>(id);
 
             if (dto == null) return NotFound();
 
-            return Ok(dto);
+            return dto;
         }
 
         [HttpGet]
         [Route("")]
-        public ActionResult<DriverDto> Get([FromQuery(Name = "id")] IEnumerable<int> ids)
+        public ActionResult<IEnumerable<DriverModel>> Get([FromQuery(Name = "id")] IEnumerable<int> ids)
         {
-            var dtos = _carService.Get(ids);
+            var dtos = _driverService.Get<DriverModel>(ids);
 
             if (dtos == null || !dtos.Any()) return NotFound();
 
-            return Ok(dtos);
+            return dtos as List<DriverModel>;
         }
 
         [HttpPost]
         [Route("")]
-        public ActionResult<bool> Create([FromBody] CreateUpdateDriverDto model)
+        [ModelValidationFilter]
+        public IActionResult Create([FromBody] CreateUpdateDriverModel model)
         {
-            return _carService.Create(model);
+            var driverModel = _driverService.Create<CreateUpdateDriverModel, DriverModel>(model);
+
+            if (driverModel == null) return UnprocessableEntity();
+
+            return Created(UrlResourceCreated("drivers", driverModel.Id), driverModel);
         }
 
         [HttpPut]
         [Route("")]
-        public ActionResult<bool> Update([FromBody] IEnumerable<DriverDto> models)
+        [ModelValidationFilter]
+        public IActionResult Update([FromBody] IEnumerable<DriverModel> models)
         {
-            return _carService.Update(models);
+            if (_driverService.Update(models))
+                return NoContent();
+
+            return UnprocessableEntity();
         }
 
         [HttpPut]
         [Route("{id}")]
-        public ActionResult<bool> Update([FromRoute] int id, [FromBody] CreateUpdateDriverDto model)
+        [ModelValidationFilter]
+        public IActionResult Update([FromRoute] int id, [FromBody] CreateUpdateDriverModel model)
         {
-            return _carService.Update(id, model);
+            if (_driverService.Update(id, model))
+                return NoContent();
+
+            return UnprocessableEntity();
         }
 
         [HttpDelete]
         [Route("{id}")]
-        public ActionResult<bool> Delete([FromRoute] int id)
+        public IActionResult Delete([FromRoute] int id)
         {
-            return _carService.Delete(id);
+            if (_driverService.Delete(id))
+                return NoContent();
+
+            return UnprocessableEntity();
         }
     }
 }

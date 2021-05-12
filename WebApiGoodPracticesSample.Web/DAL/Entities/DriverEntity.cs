@@ -1,6 +1,6 @@
-﻿namespace WebApiGoodPracticesSample.Web.DTO.Drivers
+﻿namespace WebApiGoodPracticesSample.Web.DAL.Entities
 {
-    public class CreateUpdateDriverDto
+    public class DriverEntity : CommonEntity
     {
         public string Name { get; set; }
         public string LastName { get; set; }

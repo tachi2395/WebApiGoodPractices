@@ -1,82 +1,126 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
-using WebApiGoodPracticesSample.Web.DTO.Cars;
-using WebApiGoodPracticesSample.Web.DTO.Drivers;
-using WebApiGoodPracticesSample.Web.Model;
+using WebApiGoodPracticesSample.Web.Controllers.ActionFilters;
+using WebApiGoodPracticesSample.Web.Model.Cars;
+using WebApiGoodPracticesSample.Web.Model.Drivers;
 using WebApiGoodPracticesSample.Web.Services;
+using static WebApiGoodPracticesSample.Web.Helpers.UrlBuilderHelper;
 
 namespace WebApiGoodPracticesSample.Web.Controllers
 {
-    [ApiController]
-    [Route("[controller]")]
-    public class CarsController : ControllerBase
-    {
-        private readonly CarService _carService;
-        private readonly IService<DriverModel> _driverService;
 
-        public CarsController(CarService carService, IService<DriverModel> driverService)
+    // todo: sorting
+    // todo: field selection
+    // todo: pagination
+    // todo: security
+
+    public class CarsController : ApiBaseController
+    {
+        private readonly ICarService _carService;
+
+        public CarsController(ICarService carService)
         {
             _carService = carService;
-            _driverService = driverService;
         }
 
-        [HttpGet]
-        [Route("{id}")]
-        public ActionResult<CarDto> Get([FromRoute] int id)
-        {
-            return Ok(Get(id));
-        }
+        #region GET
 
+        // queryable get
         [HttpGet]
         [Route("")]
-        public ActionResult<IEnumerable<CarDto>> Get([FromQuery(Name = "id")] IEnumerable<int> ids)
+        public ActionResult<IEnumerable<CarModel>> Get([FromQuery] CarQueryModel query)
         {
-            var dtos = _carService.Get(ids);
-            if (dtos == null || !dtos.Any()) return NotFound();
+            var models = _carService.Get(query);
 
-            return Ok(dtos);
+            if (models == null || !models.Any()) return NotFound();
+
+            return models as List<CarModel>;
         }
 
+        // get by id
+        [HttpGet]
+        [Route("{id}")]
+        public ActionResult<CarModel> Get([FromRoute] int id)
+        {
+            var car = _carService.Get<CarModel>(id);
+            if (car == null) return NotFound();
+
+            return car;
+        }
+
+        // get drivers by id
         [HttpGet]
         [Route("{id}/drivers")]
-        public ActionResult<IEnumerable<DriverDto>> GetDrivers([FromRoute] int id)
+        public ActionResult<IEnumerable<DriverModel>> GetDrivers([FromRoute] int id)
         {
-            var carDto = _carService.Get(id);
+            var drivers = _carService.GetDrivers(id);
 
-            if (carDto == null) return NotFound();
+            if (drivers == null || !drivers.Any()) return NotFound();
 
-            var drivers = _driverService.Get(x => x.CarId == carDto.Id);
-
-            return Ok(drivers);
+            return drivers as List<DriverModel>;
         }
 
+        // get driver by car id and driver id
+        [HttpGet]
+        [Route("{id}/drivers/{driverId}")]
+        public ActionResult<DriverModel> GetDrivers([FromRoute] int id, [FromRoute] int driverId)
+        {
+            var driver = _carService.GetDriver(id, driverId);
+
+            if (driver == null || driver == default) return NotFound();
+
+            return driver;
+        }
+        #endregion
+
+        // create
         [HttpPost]
         [Route("")]
-        public ActionResult<bool> Create([FromBody] CreateUpdateCarDto model)
+        [ModelValidationFilter]
+        public IActionResult Create([FromBody] CreateUpdateCarModel model)
         {
-            return _carService.Create(model);
+            var carModel = _carService.Create<CreateUpdateCarModel, CarModel>(model);
+
+            if (carModel == null) return UnprocessableEntity();
+
+            return Created(UrlResourceCreated("cars", carModel.Id), carModel);
         }
 
+        // bulk update
         [HttpPut]
         [Route("")]
-        public ActionResult<bool> Update([FromBody] IEnumerable<CarDto> models)
+        [ModelValidationFilter]
+        public IActionResult Update([FromBody] IEnumerable<CarModel> models)
         {
-            return _carService.Update(models);
+            if (_carService.Update(models))
+                return NoContent();
+
+            return UnprocessableEntity();
         }
 
+        // update by id
         [HttpPut]
         [Route("{id}")]
-        public ActionResult<bool> Update([FromRoute] int id, [FromBody] CreateUpdateCarDto model)
+        [ModelValidationFilter]
+        public IActionResult Update([FromRoute] int id, [FromBody] CreateUpdateCarModel model)
         {
-            return _carService.Update(id, model);
+            if (_carService.Update(id, model))
+                return NoContent();
+
+            return UnprocessableEntity();
         }
 
+        // delete
+        // todo: when delete a cars, drivers are not beign deleted
         [HttpDelete]
         [Route("{id}")]
-        public ActionResult<bool> Delete([FromRoute] int id)
+        public IActionResult Delete([FromRoute] int id)
         {
-            return _carService.Delete(id);
+            if (_carService.Delete(id))
+                return NoContent();
+
+            return UnprocessableEntity();
         }
     }
 }
