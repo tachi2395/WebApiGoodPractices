@@ -54,6 +54,7 @@ namespace WebApiGoodPracticesSample.Web
             services.AddSingleton<IService<CarEntity>, Service<CarEntity>>();
             services.AddSingleton<IService<DriverEntity>, Service<DriverEntity>>();
             services.AddSingleton<ICarService, CarService>();
+            services.AddSingleton<IDriverService, DriverService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

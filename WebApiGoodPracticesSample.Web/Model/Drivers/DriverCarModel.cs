@@ -4,23 +4,26 @@ using WebApiGoodPracticesSample.Web.Model.Common;
 
 namespace WebApiGoodPracticesSample.Web.Model.Drivers
 {
-    public class DriverModel
+    public class DriverCarModel
     {
         [Required]
-        public int Id { get; set; }
+        public int? Id { get; set; }
+
+        [Required]
+        public string Manufacturer { get; set; }
 
         [Required]
         public string Name { get; set; }
 
         [Required]
-        public string LastName { get; set; }
+        public string Model { get; set; }
 
         [Required]
-        public int Age { get; set; }
+        public string SerialNumber { get; set; }
 
-        public int CarId { get; set; }
+        [Required]
+        public Color? Color { get; set; }
 
         public IEnumerable<LinkObjModel> Links { get; set; }
-        public DriverCarModel Car { get; internal set; }
     }
 }

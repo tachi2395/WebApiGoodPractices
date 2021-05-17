@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using WebApiGoodPracticesSample.Web.Controllers.ActionFilters;
-using WebApiGoodPracticesSample.Web.DAL.Entities;
 using WebApiGoodPracticesSample.Web.Model.Drivers;
 using WebApiGoodPracticesSample.Web.Services;
 using static WebApiGoodPracticesSample.Web.Helpers.UrlBuilderHelper;
@@ -11,9 +10,9 @@ namespace WebApiGoodPracticesSample.Web.Controllers
 {
     public class DriversController : ApiBaseController
     {
-        private readonly IService<DriverEntity> _driverService;
+        private readonly IDriverService _driverService;
 
-        public DriversController(IService<DriverEntity> driverService)
+        public DriversController(IDriverService driverService)
         {
             _driverService = driverService;
         }
@@ -25,7 +24,7 @@ namespace WebApiGoodPracticesSample.Web.Controllers
         [Route("{id}")]
         public ActionResult<DriverModel> Get([FromRoute] int id)
         {
-            var dto = _driverService.Get<DriverModel>(id);
+            var dto = _driverService.Get(new List<int> { id })?.FirstOrDefault();
 
             if (dto == null) return NotFound();
 
@@ -36,7 +35,7 @@ namespace WebApiGoodPracticesSample.Web.Controllers
         [Route("")]
         public ActionResult<IEnumerable<DriverModel>> Get([FromQuery(Name = "id")] IEnumerable<int> ids)
         {
-            var dtos = _driverService.Get<DriverModel>(ids);
+            var dtos = _driverService.Get(ids as List<int>);
 
             if (dtos == null || !dtos.Any()) return NotFound();
 
