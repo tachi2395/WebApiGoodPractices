@@ -18,7 +18,7 @@ namespace WebApiGoodPracticesSample.Web.Helpers
             {
                 carRepository.Create(new CarEntity
                 {
-                    Manufaturer = _manufacturers[new Random().Next(_manufacturers.Count)],
+                    Manufacturer = _manufacturers[new Random().Next(_manufacturers.Count)],
                     Name = _modelCatalog[new Random().Next(_modelCatalog.Count)],
                     Model = new Random().Next(1950, 2021) + "",
                     Color = (Color)colors.GetValue(new Random().Next(colors.Length)),

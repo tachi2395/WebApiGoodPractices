@@ -4,7 +4,7 @@ namespace WebApiGoodPracticesSample.Web.DAL.Entities
 {
     public class CarEntity : CommonEntity
     {
-        public string Manufaturer { get; set; }
+        public string Manufacturer { get; set; }
         public string Name { get; set; }
         public string Model { get; set; }
         public string SerialNumber { get; set; }

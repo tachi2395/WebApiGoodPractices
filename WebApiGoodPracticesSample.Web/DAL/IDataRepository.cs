@@ -9,7 +9,7 @@ namespace WebApiGoodPracticesSample.Web.DAL
     {
         TEntity Get(int id);
         IEnumerable<TEntity> Get(IEnumerable<int> ids);
-        IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> query, Func<TEntity, TEntity> selector = null);
+        IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> query, Func<TEntity, TEntity> selector = null, Func<TEntity, object> keySelector = null, bool ascending = true);
 
         TEntity Create(TEntity entity);
 

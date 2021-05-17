@@ -5,7 +5,7 @@ namespace WebApiGoodPracticesSample.Web.Model.Cars
     public class CreateUpdateCarModel
     {
         [Required]
-        public string Manufaturer { get; set; }
+        public string Manufacturer { get; set; }
 
         [Required]
         public string Name { get; set; }

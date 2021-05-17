@@ -14,6 +14,15 @@ namespace WebApiGoodPracticesSample.Web.Services
     public class CarService : Service<CarEntity>, ICarService
     {
         private readonly IDataRepository<DriverEntity> _driverRepository;
+        private Dictionary<string, Func<CarEntity, object>> _sortDefinitions = new Dictionary<string, Func<CarEntity, object>>
+        {
+            { nameof(CarEntity.Id).ToLowerInvariant(), x => x.Id},
+            { nameof(CarEntity.Manufacturer).ToLowerInvariant(), x => x.Manufacturer},
+            { nameof(CarEntity.Name).ToLowerInvariant(), x => x.Name},
+            { nameof(CarEntity.Model).ToLowerInvariant(), x => x.Model},
+            { nameof(CarEntity.SerialNumber).ToLowerInvariant(), x => x.SerialNumber},
+            { nameof(CarEntity.Color).ToLowerInvariant(), x => x.Color}
+        };
 
         public CarService(IMapper mapper, IDataRepository<CarEntity> carRepository, IDataRepository<DriverEntity> driverRepository) : base(mapper, carRepository)
         {
@@ -32,29 +41,6 @@ namespace WebApiGoodPracticesSample.Web.Services
             if (carEntities == null || !carEntities.Any()) return null;
             var models = AddDriversAndGetModels(carEntities);
 
-            return models;
-        }
-
-        private List<CarModel> AddDriversAndGetModels(IEnumerable<CarEntity> carEntities)
-        {
-            foreach (var dto in carEntities)
-            {
-                dto.Drivers = _driverRepository.Get(x => x.CarId == dto.Id);
-            }
-
-            var models = Mapper.Map<IEnumerable<CarEntity>, IEnumerable<CarModel>>(carEntities) as List<CarModel>;
-
-            models.ForEach(x => (x.Drivers as List<DriverModel>).ForEach(d =>
-            {
-                d.Links = new List<LinkObjModel>
-                {
-                    new LinkObjModel
-                    {
-                        Rel="self",
-                        Href = $"/api/v1/drivers/{d?.Id}"
-                    }
-                };
-            }));
             return models;
         }
 
@@ -84,19 +70,63 @@ namespace WebApiGoodPracticesSample.Web.Services
 
         public IEnumerable<CarModel> Get(CarQueryModel query)
         {
+            var (sort, ascending) = GetSortDefinition(query);
             var filter = BuildFilterExpression(query);
 
-            var entities = DataRepository.Get(filter, x => new CarEntity { 
+            var entities = DataRepository.Get(filter, x => new CarEntity
+            {
                 Color = x.Color,
                 Drivers = x.Drivers,
-                //Model = x.Model,
+                Model = x.Model,
                 Id = x.Id,
-                Manufaturer = x.Manufaturer,
+                Manufacturer = x.Manufacturer,
                 Name = x.Name,
                 SerialNumber = x.SerialNumber
-            });
+            }, sort, ascending);
 
             return AddDriversAndGetModels(entities);
+        }
+
+        #region Private methods
+        private List<CarModel> AddDriversAndGetModels(IEnumerable<CarEntity> carEntities)
+        {
+            foreach (var dto in carEntities)
+            {
+                dto.Drivers = _driverRepository.Get(x => x.CarId == dto.Id);
+            }
+
+            var models = Mapper.Map<IEnumerable<CarEntity>, IEnumerable<CarModel>>(carEntities) as List<CarModel>;
+
+            models.ForEach(x => (x.Drivers as List<DriverModel>).ForEach(d =>
+            {
+                d.Links = new List<LinkObjModel>
+                {
+                    new LinkObjModel
+                    {
+                        Rel="self",
+                        Href = $"/api/v1/drivers/{d?.Id}"
+                    }
+                };
+            }));
+            return models;
+        }
+
+        private (Func<CarEntity, object>, bool) GetSortDefinition(CarQueryModel query)
+        {
+            var sort = _sortDefinitions[nameof(CarEntity.Id).ToLowerInvariant()];
+            var ascending = true;
+            if (query.Sort.Contains("+") || query.Sort.Contains("-"))
+            {
+                if (query.Sort.ElementAt(0) == '+')
+                    ascending = true;
+                else if (query.Sort.ElementAt(0) == '-')
+                    ascending = false;
+            }
+
+            if (_sortDefinitions.ContainsKey(query.Sort.ToLowerInvariant()))
+                sort = _sortDefinitions[query.Sort.ToLowerInvariant()];
+
+            return (sort, ascending);
         }
 
         private static Expression<Func<CarEntity, bool>> BuildFilterExpression(CarQueryModel query)
@@ -118,13 +148,14 @@ namespace WebApiGoodPracticesSample.Web.Services
             }
 
             // by manufacturer
-            if (query.Manufaturer != null && query.Manufaturer.Any())
+            if (query.Manufacturer != null && query.Manufacturer.Any())
             {
                 var prefix = filter.Compile();
-                filter = x => prefix(x) && query.Manufaturer.Contains(x.Manufaturer);
+                filter = x => prefix(x) && query.Manufacturer.Contains(x.Manufacturer);
             }
 
             return filter;
         }
+        #endregion
     }
 }
