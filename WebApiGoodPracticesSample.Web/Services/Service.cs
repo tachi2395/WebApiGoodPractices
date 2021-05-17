@@ -79,9 +79,9 @@ namespace WebApiGoodPracticesSample.Web.Services
         {
             try
             {
-                var entities = DataRepository.Get(query);
+                var getResponse = DataRepository.Get(query);
 
-                return Mapper.Map<IEnumerable<TEntity>, IEnumerable<TModel>>(entities);
+                return Mapper.Map<IEnumerable<TEntity>, IEnumerable<TModel>>(getResponse.entities);
             }
             catch
             {

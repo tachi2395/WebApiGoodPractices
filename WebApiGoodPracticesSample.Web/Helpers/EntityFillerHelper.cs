@@ -29,7 +29,8 @@ namespace WebApiGoodPracticesSample.Web.Helpers
             }
 
             // filling drivers
-            var cars = carRepository.Get(x => true) as List<CarEntity>;
+            var getResponse = carRepository.Get(x => true);
+            var cars = getResponse.entities as List<CarEntity>;
 
             for (var i = 0; i < DRIVERS; i++)
             {

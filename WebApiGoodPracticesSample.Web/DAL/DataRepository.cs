@@ -28,7 +28,10 @@ namespace WebApiGoodPracticesSample.Web.DAL
             return _entitites;
         }
 
-        public IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> query, Func<TEntity, TEntity> selector = null, Func<TEntity, object> keySelector = null, bool orderAscending = true)
+        public (IEnumerable<TEntity> entities, int totalCount) Get(Expression<Func<TEntity, bool>> query, 
+            Func<TEntity, TEntity> selector = null, 
+            Func<TEntity, object> keySelector = null,
+            bool orderAscending = true, int page = 0, int pageSize = 0)
         {
             var entities = _entitites
                 .Where(query.Compile())
@@ -42,7 +45,14 @@ namespace WebApiGoodPracticesSample.Web.DAL
             if (selector != null)
                 entities = entities.Select(selector).ToList();
 
-            return entities;
+            var totalConunt = entities.Count;
+
+            if (pageSize != 0 && page != 0) {
+                var skip = (page - 1) * pageSize;
+                entities = entities.Skip(skip).Take(pageSize).ToList();
+            }
+
+            return (entities, totalConunt);
         }
 
         public TEntity Create(TEntity model)

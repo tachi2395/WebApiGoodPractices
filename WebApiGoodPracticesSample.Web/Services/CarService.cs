@@ -50,9 +50,9 @@ namespace WebApiGoodPracticesSample.Web.Services
 
             if (car == null) return null;
 
-            var driverEntities = _driverRepository.Get(x => x.CarId == car.Id);
+            var getResponse = _driverRepository.Get(x => x.CarId == car.Id);
 
-            return Mapper.Map<IEnumerable<DriverEntity>, IEnumerable<DriverModel>>(driverEntities);
+            return Mapper.Map<IEnumerable<DriverEntity>, IEnumerable<DriverModel>>(getResponse.entities);
         }
 
         public DriverModel GetDriver(int id, int driverId)
@@ -61,22 +61,29 @@ namespace WebApiGoodPracticesSample.Web.Services
 
             if (car == null) return null;
 
-            var drivers = _driverRepository.Get(x => x.CarId == car.Id);
+            var getResponse = _driverRepository.Get(x => x.CarId == car.Id);
+            var drivers = getResponse.entities;
 
             var driverEntity = drivers?.Where(x => x.Id == driverId)?.FirstOrDefault();
 
             return Mapper.Map<DriverEntity, DriverModel>(driverEntity);
         }
 
-        public IEnumerable<CarModel> Get(CarQueryModel query)
+        public PaginatedModel<CarModel> Get(CarQueryModel query)
         {
             var (sort, ascending) = GetSortDefinition(query);
             var filter = BuildFilterExpression(query);
             var projection = GetProjection(query);
 
-            var entities = DataRepository.Get(filter, projection, sort, ascending);
+            var getResponse = DataRepository.Get(filter, projection, sort, ascending, query.Page, query.PageSize);
 
-            return AddDriversAndGetModels(entities);
+            return new PaginatedModel<CarModel>
+            {
+                Page = query.Page,
+                PageSize = query.PageSize,
+                TotalCount = getResponse.totalCount,
+                Results = AddDriversAndGetModels(getResponse.entities)
+            };
         }
 
         #region Private methods
@@ -102,7 +109,10 @@ namespace WebApiGoodPracticesSample.Web.Services
         private List<CarModel> AddDriversAndGetModels(IEnumerable<CarEntity> carEntities)
         {
             foreach (var dto in carEntities)
-                dto.Drivers = _driverRepository.Get(x => x.CarId == dto.Id);
+            {
+                var getResponse = _driverRepository.Get(x => x.CarId == dto.Id);
+                dto.Drivers = getResponse.entities;
+            }
 
             var models = Mapper.Map<IEnumerable<CarEntity>, IEnumerable<CarModel>>(carEntities) as List<CarModel>;
 

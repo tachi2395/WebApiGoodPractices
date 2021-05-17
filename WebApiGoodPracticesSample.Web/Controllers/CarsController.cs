@@ -3,16 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using WebApiGoodPracticesSample.Web.Controllers.ActionFilters;
 using WebApiGoodPracticesSample.Web.Model.Cars;
+using WebApiGoodPracticesSample.Web.Model.Common;
 using WebApiGoodPracticesSample.Web.Model.Drivers;
 using WebApiGoodPracticesSample.Web.Services;
 using static WebApiGoodPracticesSample.Web.Helpers.UrlBuilderHelper;
 
 namespace WebApiGoodPracticesSample.Web.Controllers
 {
-
-    // todo: sorting
-    // todo: field selection
-    // todo: pagination
     // todo: security
 
     public class CarsController : ApiBaseController
@@ -29,13 +26,13 @@ namespace WebApiGoodPracticesSample.Web.Controllers
         // queryable get
         [HttpGet]
         [Route("")]
-        public ActionResult<IEnumerable<CarModel>> Get([FromQuery] CarQueryModel query)
+        public ActionResult<PaginatedModel<CarModel>> Get([FromQuery] CarQueryModel query)
         {
             var models = _carService.Get(query);
 
-            if (models == null || !models.Any()) return NotFound();
+            if (models == null || models.Results == null || !models.Results.Any()) return NotFound();
 
-            return models as List<CarModel>;
+            return models;
         }
 
         // get by id
