@@ -7,7 +7,7 @@ namespace WebApiGoodPracticesSample.Web.Model.Cars
     public class CarModel
     {
         [Required]
-        public int Id { get; set; }
+        public int? Id { get; set; }
 
         [Required]
         public string Manufacturer { get; set; }
@@ -22,7 +22,7 @@ namespace WebApiGoodPracticesSample.Web.Model.Cars
         public string SerialNumber { get; set; }
 
         [Required]
-        public Color Color { get; set; }
+        public Color? Color { get; set; }
 
         public IEnumerable<DriverModel> Drivers { get; set; }
     }

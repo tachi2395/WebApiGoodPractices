@@ -23,7 +23,7 @@ namespace WebApiGoodPracticesSample.Web.DAL
         public IEnumerable<TEntity> Get(IEnumerable<int> ids)
         {
             if (ids != null && ids.Any())
-                return _entitites.Where(x => ids.Contains(x.Id)).ToList();
+                return _entitites.Where(x => ids.Contains((int)x.Id)).ToList();
 
             return _entitites;
         }

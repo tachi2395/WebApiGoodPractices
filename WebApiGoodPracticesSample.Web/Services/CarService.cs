@@ -72,28 +72,37 @@ namespace WebApiGoodPracticesSample.Web.Services
         {
             var (sort, ascending) = GetSortDefinition(query);
             var filter = BuildFilterExpression(query);
+            var projection = GetProjection(query);
 
-            var entities = DataRepository.Get(filter, x => new CarEntity
-            {
-                Color = x.Color,
-                Drivers = x.Drivers,
-                Model = x.Model,
-                Id = x.Id,
-                Manufacturer = x.Manufacturer,
-                Name = x.Name,
-                SerialNumber = x.SerialNumber
-            }, sort, ascending);
+            var entities = DataRepository.Get(filter, projection, sort, ascending);
 
             return AddDriversAndGetModels(entities);
         }
 
         #region Private methods
+        private static Func<CarEntity, CarEntity> GetProjection(CarQueryModel query)
+        {
+            Func<CarEntity, CarEntity> projection = null;
+
+            if (query.Field != null && query.Field.Any())
+                projection = x => new CarEntity
+                {
+                    Color = query.Field.Contains(nameof(x.Color).ToLowerInvariant()) ? x.Color : null,
+                    Drivers = query.Field.Contains(nameof(x.Drivers).ToLowerInvariant()) ? x.Drivers : null,
+                    Model = query.Field.Contains(nameof(x.Model).ToLowerInvariant()) ? x.Model : null,
+                    Id = query.Field.Contains(nameof(x.Id).ToLowerInvariant()) ? x.Id : null,
+                    Manufacturer = query.Field.Contains(nameof(x.Manufacturer).ToLowerInvariant()) ? x.Manufacturer : null,
+                    Name = query.Field.Contains(nameof(x.Name).ToLowerInvariant()) ? x.Name : null,
+                    SerialNumber = query.Field.Contains(nameof(x.SerialNumber).ToLowerInvariant()) ? x.SerialNumber : null
+                };
+
+            return projection;
+        }
+
         private List<CarModel> AddDriversAndGetModels(IEnumerable<CarEntity> carEntities)
         {
             foreach (var dto in carEntities)
-            {
                 dto.Drivers = _driverRepository.Get(x => x.CarId == dto.Id);
-            }
 
             var models = Mapper.Map<IEnumerable<CarEntity>, IEnumerable<CarModel>>(carEntities) as List<CarModel>;
 
@@ -108,6 +117,9 @@ namespace WebApiGoodPracticesSample.Web.Services
                     }
                 };
             }));
+
+            models.ForEach(x => x.Drivers = x.Drivers != null && x.Drivers.Any() ? x.Drivers : null);
+
             return models;
         }
 
@@ -137,7 +149,7 @@ namespace WebApiGoodPracticesSample.Web.Services
             if (query.Id != null && query.Id.Any())
             {
                 var prefix = filter.Compile();
-                filter = x => prefix(x) && query.Id.Contains(x.Id);
+                filter = x => prefix(x) && query.Id.Contains((int)x.Id);
             }
 
             // by name

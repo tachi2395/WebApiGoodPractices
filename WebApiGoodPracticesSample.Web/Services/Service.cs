@@ -97,7 +97,7 @@ namespace WebApiGoodPracticesSample.Web.Services
                 foreach (var car in cars)
                 {
                     var model = Mapper.Map<TModel, TEntity>(car);
-                    var updateResult = DataRepository.Update(model.Id, model);
+                    var updateResult = DataRepository.Update((int)model.Id, model);
 
                     if (!updateResult) return false;
                 }

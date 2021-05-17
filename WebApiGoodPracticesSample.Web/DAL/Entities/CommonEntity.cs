@@ -2,6 +2,6 @@
 {
     public class CommonEntity
     {
-        public int Id { get; set; }
+        public int? Id { get; set; }
     }
 }
