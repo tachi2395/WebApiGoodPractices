@@ -29,21 +29,21 @@ namespace WebApiGoodPracticesSample.Web.DAL
         }
 
         public (IEnumerable<TEntity> entities, int totalCount) Get(Expression<Func<TEntity, bool>> query, 
-            Func<TEntity, TEntity> selector = null, 
-            Func<TEntity, object> keySelector = null,
+            Func<TEntity, TEntity> projectionSelector = null, 
+            Func<TEntity, object> sortSelector = null,
             bool orderAscending = true, int page = 0, int pageSize = 0)
         {
             var entities = _entitites
                 .Where(query.Compile())
                 .ToList();
 
-            if (selector != null)
+            if (sortSelector != null)
                 entities = orderAscending
-                    ? entities.OrderBy(keySelector).ToList()
-                    : entities.OrderByDescending(keySelector).ToList();
+                    ? entities.OrderBy(sortSelector).ToList()
+                    : entities.OrderByDescending(sortSelector).ToList();
 
-            if (selector != null)
-                entities = entities.Select(selector).ToList();
+            if (projectionSelector != null)
+                entities = entities.Select(projectionSelector).ToList();
 
             var totalConunt = entities.Count;
 

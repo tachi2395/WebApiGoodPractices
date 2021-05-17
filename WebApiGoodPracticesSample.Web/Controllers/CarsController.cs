@@ -4,7 +4,6 @@ using System.Linq;
 using WebApiGoodPracticesSample.Web.Controllers.ActionFilters;
 using WebApiGoodPracticesSample.Web.Model.Cars;
 using WebApiGoodPracticesSample.Web.Model.Common;
-using WebApiGoodPracticesSample.Web.Model.Drivers;
 using WebApiGoodPracticesSample.Web.Services;
 using static WebApiGoodPracticesSample.Web.Helpers.UrlBuilderHelper;
 
@@ -40,7 +39,7 @@ namespace WebApiGoodPracticesSample.Web.Controllers
         [Route("{id}")]
         public ActionResult<CarModel> Get([FromRoute] int id)
         {
-            var car = _carService.Get<CarModel>(id);
+            var car = _carService.Get(new List<int> { id })?.FirstOrDefault();
             if (car == null) return NotFound();
 
             return car;
@@ -49,19 +48,19 @@ namespace WebApiGoodPracticesSample.Web.Controllers
         // get drivers by id
         [HttpGet]
         [Route("{id}/drivers")]
-        public ActionResult<IEnumerable<DriverModel>> GetDrivers([FromRoute] int id)
+        public ActionResult<IEnumerable<CarDriverModel>> GetDrivers([FromRoute] int id)
         {
             var drivers = _carService.GetDrivers(id);
 
             if (drivers == null || !drivers.Any()) return NotFound();
 
-            return drivers as List<DriverModel>;
+            return drivers as List<CarDriverModel>;
         }
 
         // get driver by car id and driver id
         [HttpGet]
         [Route("{id}/drivers/{driverId}")]
-        public ActionResult<DriverModel> GetDrivers([FromRoute] int id, [FromRoute] int driverId)
+        public ActionResult<CarDriverModel> GetDrivers([FromRoute] int id, [FromRoute] int driverId)
         {
             var driver = _carService.GetDriver(id, driverId);
 

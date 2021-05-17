@@ -7,13 +7,13 @@ using WebApiGoodPracticesSample.Web.DAL;
 using WebApiGoodPracticesSample.Web.DAL.Entities;
 using WebApiGoodPracticesSample.Web.Model.Cars;
 using WebApiGoodPracticesSample.Web.Model.Common;
-using WebApiGoodPracticesSample.Web.Model.Drivers;
 
 namespace WebApiGoodPracticesSample.Web.Services
 {
     public class CarService : Service<CarEntity>, ICarService
     {
-        private readonly IDataRepository<DriverEntity> _driverRepository;
+        private readonly IDriverService _driverService;
+
         private Dictionary<string, Func<CarEntity, object>> _sortDefinitions = new Dictionary<string, Func<CarEntity, object>>
         {
             { nameof(CarEntity.Id).ToLowerInvariant(), x => x.Id},
@@ -24,14 +24,9 @@ namespace WebApiGoodPracticesSample.Web.Services
             { nameof(CarEntity.Color).ToLowerInvariant(), x => x.Color}
         };
 
-        public CarService(IMapper mapper, IDataRepository<CarEntity> carRepository, IDataRepository<DriverEntity> driverRepository) : base(mapper, carRepository)
+        public CarService(IMapper mapper, IDataRepository<CarEntity> carRepository, IDriverService driverService) : base(mapper, carRepository)
         {
-            _driverRepository = driverRepository;
-        }
-
-        public override TModel Get<TModel>(int id)
-        {
-            return Get<TModel>(new List<int> { id }).FirstOrDefault();
+            _driverService = driverService;
         }
 
         public IEnumerable<CarModel> Get(IEnumerable<int> ids)
@@ -39,84 +34,87 @@ namespace WebApiGoodPracticesSample.Web.Services
             var carEntities = DataRepository.Get(ids);
 
             if (carEntities == null || !carEntities.Any()) return null;
-            var models = AddDriversAndGetModels(carEntities);
+            var models = AddDriversAndGetModels(carEntities, true);
 
             return models;
         }
 
-        public IEnumerable<DriverModel> GetDrivers(int id)
+        public IEnumerable<CarDriverModel> GetDrivers(int carId)
         {
-            var car = DataRepository.Get(id);
+            var driverModels = _driverService.Get(x => x.CarId == carId);
 
-            if (car == null) return null;
-
-            var getResponse = _driverRepository.Get(x => x.CarId == car.Id);
-
-            return Mapper.Map<IEnumerable<DriverEntity>, IEnumerable<DriverModel>>(getResponse.entities);
+            return Mapper.Map<IEnumerable<Model.Drivers.DriverModel>, IEnumerable<CarDriverModel>>(driverModels);
         }
 
-        public DriverModel GetDriver(int id, int driverId)
+        public CarDriverModel GetDriver(int carId, int driverId)
         {
-            var car = DataRepository.Get(id);
+            var driverModels = _driverService.Get(x => x.CarId == carId && x.Id == driverId);
 
-            if (car == null) return null;
-
-            var getResponse = _driverRepository.Get(x => x.CarId == car.Id);
-            var drivers = getResponse.entities;
-
-            var driverEntity = drivers?.Where(x => x.Id == driverId)?.FirstOrDefault();
-
-            return Mapper.Map<DriverEntity, DriverModel>(driverEntity);
+            return Mapper.Map<Model.Drivers.DriverModel, CarDriverModel>(driverModels?.FirstOrDefault());
         }
 
         public PaginatedModel<CarModel> Get(CarQueryModel query)
         {
             var (sort, ascending) = GetSortDefinition(query);
             var filter = BuildFilterExpression(query);
-            var projection = GetProjection(query);
+            var (sortDefinition, includeDrivers) = GetProjection(query);
 
-            var getResponse = DataRepository.Get(filter, projection, sort, ascending, query.Page, query.PageSize);
+            var getResponse = DataRepository.Get(filter, sortDefinition, sort, ascending, query.Page, query.PageSize);
 
             return new PaginatedModel<CarModel>
             {
                 Page = query.Page,
                 PageSize = query.PageSize,
                 TotalCount = getResponse.totalCount,
-                Results = AddDriversAndGetModels(getResponse.entities)
+                Results = AddDriversAndGetModels(getResponse.entities, includeDrivers)
             };
         }
 
         #region Private methods
-        private static Func<CarEntity, CarEntity> GetProjection(CarQueryModel query)
+        private static (Func<CarEntity, CarEntity> sortDefinition, bool includeDrivers) GetProjection(CarQueryModel query)
         {
             Func<CarEntity, CarEntity> projection = null;
+            var includeDrivers = true;
 
             if (query.Field != null && query.Field.Any())
+            {
                 projection = x => new CarEntity
                 {
+                    Id = x.Id,
                     Color = query.Field.Contains(nameof(x.Color).ToLowerInvariant()) ? x.Color : null,
-                    Drivers = query.Field.Contains(nameof(x.Drivers).ToLowerInvariant()) ? x.Drivers : null,
                     Model = query.Field.Contains(nameof(x.Model).ToLowerInvariant()) ? x.Model : null,
-                    Id = query.Field.Contains(nameof(x.Id).ToLowerInvariant()) ? x.Id : null,
                     Manufacturer = query.Field.Contains(nameof(x.Manufacturer).ToLowerInvariant()) ? x.Manufacturer : null,
                     Name = query.Field.Contains(nameof(x.Name).ToLowerInvariant()) ? x.Name : null,
                     SerialNumber = query.Field.Contains(nameof(x.SerialNumber).ToLowerInvariant()) ? x.SerialNumber : null
                 };
 
-            return projection;
-        }
-
-        private List<CarModel> AddDriversAndGetModels(IEnumerable<CarEntity> carEntities)
-        {
-            foreach (var dto in carEntities)
-            {
-                var getResponse = _driverRepository.Get(x => x.CarId == dto.Id);
-                dto.Drivers = getResponse.entities;
+                includeDrivers = query.Field.Contains(nameof(CarModel.Drivers).ToLowerInvariant());
             }
 
+            return (projection, includeDrivers);
+        }
+
+        private List<CarModel> AddDriversAndGetModels(IEnumerable<CarEntity> carEntities, bool includeDrivers)
+        {
+            // mapping to model
             var models = Mapper.Map<IEnumerable<CarEntity>, IEnumerable<CarModel>>(carEntities) as List<CarModel>;
 
-            models.ForEach(x => (x.Drivers as List<DriverModel>).ForEach(d =>
+            if (!includeDrivers) return models;
+
+            // getting drivers for each car
+            models.Clear();
+            foreach (var carEntitie in carEntities)
+            {
+                var driverModels = _driverService.Get(x => x.CarId == carEntitie.Id);
+
+                var carModel = Mapper.Map<CarEntity, CarModel>(carEntitie);
+                carModel.Drivers = Mapper.Map<IEnumerable<Model.Drivers.DriverModel>, IEnumerable<CarDriverModel>>(driverModels);
+
+                models.Add(carModel);
+            }
+
+            // setting hateoas for each d
+            models.ForEach(x => (x.Drivers as List<CarDriverModel>).ForEach(d =>
             {
                 d.Links = new List<LinkObjModel>
                 {
@@ -128,6 +126,7 @@ namespace WebApiGoodPracticesSample.Web.Services
                 };
             }));
 
+            // removing empty drivers
             models.ForEach(x => x.Drivers = x.Drivers != null && x.Drivers.Any() ? x.Drivers : null);
 
             return models;
@@ -136,17 +135,16 @@ namespace WebApiGoodPracticesSample.Web.Services
         private (Func<CarEntity, object>, bool) GetSortDefinition(CarQueryModel query)
         {
             var sort = _sortDefinitions[nameof(CarEntity.Id).ToLowerInvariant()];
-            var ascending = true;
-            if (query.Sort.Contains("+") || query.Sort.Contains("-"))
-            {
-                if (query.Sort.ElementAt(0) == '+')
-                    ascending = true;
-                else if (query.Sort.ElementAt(0) == '-')
-                    ascending = false;
-            }
 
-            if (_sortDefinitions.ContainsKey(query.Sort.ToLowerInvariant()))
-                sort = _sortDefinitions[query.Sort.ToLowerInvariant()];
+            var sortOperator = query.Sort.Substring(0, 1);
+            var sortField = query.Sort.Substring(1).ToLowerInvariant();
+
+            var ascending = sortOperator == "+"
+                ? true
+                : sortOperator != "-";
+
+            if (_sortDefinitions.ContainsKey(sortField))
+                sort = _sortDefinitions[sortField];
 
             return (sort, ascending);
         }

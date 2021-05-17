@@ -23,7 +23,6 @@ namespace WebApiGoodPracticesSample.Web.Helpers
                     Model = new Random().Next(1950, 2021) + "",
                     Color = (Color)colors.GetValue(new Random().Next(colors.Length)),
                     SerialNumber = Guid.NewGuid().ToString("n").Substring(0, 8),
-                    Drivers = new List<DriverEntity>(),
                     Id = 0
                 });
             }
